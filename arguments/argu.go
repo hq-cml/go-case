@@ -1,6 +1,8 @@
 package main
 
 /*
+ * 命令行参数的读取：
+ *
  * 命令行参数解析主要通过flag包实现
  *
  * // String defines a string flag with specified name, default value, and usage string.
