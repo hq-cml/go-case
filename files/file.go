@@ -75,10 +75,12 @@ func write_file(values []int, outfile string) error {
 }
 
 func main() {
-    rows, err := read_file("/tmp/test.file1")
+    rows, err := read_file("/tmp/test.file")
     if err == nil{
         fmt.Println("File:", rows)
     }else{
         fmt.Println("Error:", err)
     }
+
+    write_file(rows, "/tmp/test.file.1")
 }
