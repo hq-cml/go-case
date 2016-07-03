@@ -1,6 +1,7 @@
 package main
 //golang更推荐用channel做同步，不推荐用这种方式
-//但也保留了这种用法
+//但也保留了这种用法. golang中的锁有两种：sync.Mutex和sync.RWMutex
+//前者是独占锁，后者是读锁~
 import "fmt"
 import "sync"
 import "runtime"
@@ -9,9 +10,10 @@ var counter int = 0 //全局变量
 
 func Count(id int, lock *sync.Mutex){
     lock.Lock()
+    defer lock.Unlock()
     counter ++
     fmt.Println("goroutine", id, "get lock. counter:", counter)
-    lock.Unlock()
+    //lock.Unlock()
 }
 
 func main() {
