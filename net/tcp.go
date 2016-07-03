@@ -3,6 +3,8 @@ package main
  * golang的tcp用法
  * 1. 直接Dial
  * 2. DialTCP
+
+ * 基于tcp发送http的head请求~
  */
 import (
 	"net"
@@ -10,6 +12,7 @@ import (
 	"os"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 )
 
 func checkError(err error) {
@@ -50,6 +53,23 @@ func head1(service string){
 	fmt.Println(string(result))
 }
 
+func head2(service string){
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
+	checkError(err)
+
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	checkError(err)
+
+	_, err = conn.Write([]byte("HEAD / HTTP/1.0\r\n\r\n"))
+	checkError(err)
+
+	//result, err := readFully(conn)
+	result, err := ioutil.ReadAll(conn)
+	checkError(err)
+
+	fmt.Println(string(result))
+}
+
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr, "Usage: %s host:port", os.Args[0])
@@ -58,6 +78,7 @@ func main() {
 	service := os.Args[1]
 
 	head1(service)
+	head2(service)
 
 	os.Exit(0)
 }
