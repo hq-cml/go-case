@@ -51,7 +51,32 @@ func json_decode2(){
         fmt.Printf("%v\n",r)
     }
 
-    
+    //解码完毕之后，r应该是map[string]interface{}类型变量，所以要进行类型断言
+    book, ok := r.(map[string]interface{})
+    if ok {
+        //遍历所有成员，进行类型判断
+        for k,v := range book{
+            switch tv := v.(type){ //注意，此处tv是一个明确了类型的值，而v是一个interface{}类型变量
+            case string:
+                fmt.Println(k, "is string:", tv)
+            case int:
+                fmt.Println(k, "is int:", tv)
+            case bool:
+                fmt.Println(k, "is bool:", tv)
+            case float64:
+                fmt.Println(k, "is float:", tv)
+            case []interface{}:
+                fmt.Println(k, "is array:")
+                for k1, v1 := range tv{
+                    fmt.Println(" ", k1, v1)
+                }
+            default:
+                fmt.Println("Type error")
+            }
+        }
+    }else{
+        fmt.Println("Json解码出错:", err.Error())
+    }
 }
 
 func main(){
