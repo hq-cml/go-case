@@ -5,6 +5,7 @@ import (
     "log"
     "net/http"
     "fmt"
+    "os"
 )
 
 const (
@@ -29,6 +30,32 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 </body>
 </html>`)
         return
+    }else if r.Method == "POST" {
+        f, h, err := r.FormFile("image") //读取表单上传的image
+        if err != nil{
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        filename := h.Filename
+        defer f.Close()  //注册关闭
+
+        t, err := os.Create(UPLOAD_DIR + "/" + filename) //创建一个接受文件
+        if err != nil{
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        defer t.Close() //注册关闭
+
+        _, err = io.Copy(t, f) //拷贝文件到接受文件
+        if err != nil{
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+
+        //重定向到展示文件
+        http.Redirect(w, r, "/view?id="+filename, http.StatusFound)
+    }else{
+        io.WriteString(w,"Unknow method!")
     }
 }
 
