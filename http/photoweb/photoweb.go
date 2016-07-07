@@ -23,7 +23,7 @@ var templates = make(map[string]*template.Template) //全局变量，预缓存�
 func init() {
     fileInfoArr, err := ioutil.ReadDir(TEMPLATE_DIR)
     if err != nil{
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+        //http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
     var templateName, templatePath string
@@ -34,7 +34,7 @@ func init() {
         }
         templatePath = TEMPLATE_DIR + "/" + templateName
         log.Println("Loading template:", templatePath)
-        t := template.Must(template.ParseFiles(templatePath))
+        t := template.Must(template.ParseFiles(templatePath)) //Must表示ParseFiles必须要成功，否则直接触发错误，算是一种断言
         templates[templateName] = t
     }
 }
@@ -42,11 +42,13 @@ func init() {
 //渲染模板
 func renderHtml(w http.ResponseWriter, tmpl string, locals map[string]interface{}) (err error) {
     fmt.Println(tmpl+".html")
-    t, err := template.ParseFiles(tmpl+".html")
+    tmpl += ".html"
+    err = templates[tmpl].Execute(w, locals)//Execute,根据模板语法渲染输出结果，并将结果作为返回值, locals是传入模板参数
+
     if err != nil{
+        http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-    err = t.Execute(w, locals)//Execute,根据模板语法渲染输出结果，并将结果作为返回值, locals是传入模板参数
     return
 }
 
