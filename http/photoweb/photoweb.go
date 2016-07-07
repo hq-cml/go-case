@@ -8,13 +8,36 @@ import (
     "os"
     "html/template"
     "io/ioutil"
+    "path"
 )
 
 const (
     ListDir      = 0x0001
     UPLOAD_DIR   = "/tmp/uploads"
-    TEMPLATE_DIR = "./views"
+    TEMPLATE_DIR = "/tmp/views"
 )
+
+var templates = make(map[string]*template.Template) //全局变量，预缓存模板
+
+//init函数，在main之前执行 ：实现模板缓存的预加载等逻辑
+func init() {
+    fileInfoArr, err := ioutil.ReadDir(TEMPLATE_DIR)
+    if err != nil{
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    var templateName, templatePath string
+    for _, fileInfo := range fileInfoArr {
+        templateName = fileInfo.Name()
+        if ext := path.Ext(templateName); ext != ".html" { //仅加载
+            continue
+        }
+        templatePath = TEMPLATE_DIR + "/" + templateName
+        log.Println("Loading template:", templatePath)
+        t := template.Must(template.ParseFiles(templatePath))
+        templates[templateName] = t
+    }
+}
 
 //渲染模板
 func renderHtml(w http.ResponseWriter, tmpl string, locals map[string]interface{}) (err error) {
