@@ -6,6 +6,7 @@ import (
     "net/http"
     "fmt"
     "os"
+    "html/template"
 )
 
 const (
@@ -16,19 +17,12 @@ const (
 
 func uploadHandler(w http.ResponseWriter, r *http.Request){
     if r.Method == "GET"{
-        io.WriteString(w, `<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Upload</title>
-</head>
-<body>
-  <form method="POST" action="/upload" enctype="multipart/form-data">
-    Choose an image to upload: <input name="image" type="file" />
-    <input type="submit" value="Upload" />
-  </form>
-</body>
-</html>`)
+        t, err := template.ParseFiles("upload.html")
+        if err != nil{
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        t.Execute(w, nil) //Execute,根据模板语法渲染输出结果，并将结果作为返回值
         return
     }else if r.Method == "POST" {
         f, h, err := r.FormFile("image") //读取表单上传的image
