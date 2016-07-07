@@ -15,14 +15,22 @@ const (
     TEMPLATE_DIR = "./views"
 )
 
+//渲染模板
+func renderHtml(w http.ResponseWriter, tmpl string, locals map[string]interface{}) (err error) {
+    t, err := template.ParseFiles(tmpl+".html")
+    if err != nil{
+        return
+    }
+    err = t.Execute(w, locals)//Execute,根据模板语法渲染输出结果，并将结果作为返回值
+    return
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request){
     if r.Method == "GET"{
-        t, err := template.ParseFiles("upload.html")
-        if err != nil{
+        if err := renderHtml(w, "upload", nil); err != nil{
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
-        t.Execute(w, nil) //Execute,根据模板语法渲染输出结果，并将结果作为返回值
         return
     }else if r.Method == "POST" {
         f, h, err := r.FormFile("image") //读取表单上传的image
