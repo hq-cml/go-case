@@ -9,6 +9,7 @@ import (
     "html/template"
     "io/ioutil"
     "path"
+    "runtime/debug"
 )
 
 const (
@@ -36,6 +37,27 @@ func init() {
         log.Println("Loading template:", templatePath)
         t := template.Must(template.ParseFiles(templatePath)) //Must表示ParseFiles必须要成功，否则直接触发错误，算是一种断言
         templates[templateName] = t
+    }
+}
+
+//定义一个闭包，入参和返回都是一个http.HandlerFunc函数指针
+//这样，任何逻辑处理的错误向上回溯的时候，都能对其进行拦截
+func safeHandler(fn http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        defer func() { //注册一个defer，勾住可能的错误
+            if e, ok := recover().(error); ok {
+                http.Error(w, e.Error(), http.StatusInternalServerError)
+
+                // 或者输出自定义的 50x 错误页面
+                // w.WriteHeader(http.StatusInternalServerError)
+                // renderHtml(w, "error", e.Error())
+
+                // logging
+                log.Println("WARN: panic fired in %v.panic - %v", fn, e)
+                log.Println(string(debug.Stack()))
+            }
+        }()
+        fn(w, r) //实际调用处理逻辑函数
     }
 }
 
