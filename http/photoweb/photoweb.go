@@ -137,8 +137,24 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
     io.WriteString(w, "Hello world!")
 }
 
+//动静分离，这块暂时不太懂
+func staticDirHandler(mux *http.ServeMux, prefix string, staticDir string, flags int) {
+    mux.HandleFunc(prefix, func(w http.ResponseWriter, r *http.Request) {
+        file := staticDir + r.URL.Path[len(prefix)-1:]
+        if (flags & ListDir) == 0 {
+            fi, err := os.Stat(file)
+            if err != nil || fi.IsDir() {
+                http.NotFound(w, r)
+                return
+            }
+        }
+        http.ServeFile(w, r, file)
+    })
+}
 
 func main() {
+    //mux := http.NewServeMux()
+    //staticDirHandler(mux, "/assets/", "./public", 0)
     http.HandleFunc("/hello", helloHandler)  //注册分发请求指针
     http.HandleFunc("/upload", safeHandler(uploadHandler))
     http.HandleFunc("/view", safeHandler(viewHandler))
