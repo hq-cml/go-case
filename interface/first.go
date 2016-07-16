@@ -19,6 +19,7 @@ func main(){
     speaker = &SimpleSpeaker{"Hello"}
     speaker.Speak()
 
-    speaker = SimpleSpeaker{"World"}
+    //如下写法会报错，因为SimpleSpeaker并未实现ISpeaker，而是*SimpleSpeaker实现了
+    //speaker = SimpleSpeaker{"World"}
     //speaker.Speak()
 }
