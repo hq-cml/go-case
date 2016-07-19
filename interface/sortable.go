@@ -19,7 +19,9 @@ type Sortable interface{
 }
 
 //自定义类型
+//注意，将3去掉，就会变成切片，引用类型，结果将发生变化！！
 type SortableArr [3]string
+//type SortableArr []string
 
 //func1
 func (self SortableArr) Len() int{
