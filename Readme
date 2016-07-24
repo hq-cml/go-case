@@ -4,4 +4,14 @@ Golang 的一些简单常见case。列出备忘~
 2.files: 文件读写
 3.cmdline: 命令行界面交互
 4.concurrency: 并发相关主题，比如：锁等
+5.cgo: 交互式开发，go中嵌套c语言
+6.closure: 闭包
+7.functions: 函数和方法
+8.http: http相关
+9.interface: 接口
+10.json：json相关
+11.net：网络相关
+12.reflect：反射
+13.secure：安全相关，md5 & sha1
+14. base-control：基本控制
 
