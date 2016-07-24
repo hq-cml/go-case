@@ -17,8 +17,10 @@ func checkLan(lan string){
     }
 }
 
+
 func main(){
     checkLan("Golang")
     checkLan("PHP")
     checkLan("go")
+
 }
