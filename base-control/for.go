@@ -70,10 +70,37 @@ func demo5(){
     }
 }
 
+//go continue
+func demo6(){
+    arr1 := []int{1,2,3,4}
+    arr2 := []int{1,2,3,4}
+
+    L1: //直接跳到外层的L之后
+    for _,v1 := range arr1{
+        //L2:
+        for _,v2 := range arr2{
+            fmt.Printf("Num:")
+            if(v1 == 2){
+                //尝试放开注释，看看结果~
+                fmt.Println()
+                //continue
+                continue L1
+                //continue L2
+            }
+            fmt.Printf("%d, %d", v1, v2)
+            fmt.Println()
+        }
+    }
+}
 func main(){
     demo1()
     demo2()
     demo3()
     demo4()
+
+    //体会break、continue、goto的不同
     demo5()
+    demo6()
+
+
 }
