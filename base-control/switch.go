@@ -32,6 +32,18 @@ func checkType(v interface{}){
     }
 }
 
+//golang风格用法
+func goSwitch(v int){
+    switch {
+    case v<0:
+        fmt.Println("v is negative")
+    case v == 0:
+        fmt.Println("v is 0")
+    default:
+        fmt.Println("v is positive")
+    }
+}
+
 func main(){
     checkLan("Golang")
     checkLan("PHP")
@@ -42,4 +54,6 @@ func main(){
     checkType("AAA")
     checkType(13)
     checkType(13.0)
+
+    goSwitch(10)
 }
