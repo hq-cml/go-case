@@ -22,7 +22,22 @@ func demo2(){
     fmt.Println()
 }
 
+//golang风格死循环
+func demo3(){
+    var num int
+    for {
+        num ++
+        fmt.Printf("%d  ", num)
+        if num > 3{
+            break
+        }
+    }
+    fmt.Println()
+}
+
+
 func main(){
     demo1()
     demo2()
+    demo3()
 }
