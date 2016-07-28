@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "bytes"
+    "go/doc"
 )
 
 /*
@@ -113,6 +114,29 @@ func (set *HashSet) String() string {
     return buf.String()
 }
 
+//真包含判断，或者说超集判断
+func (set *HashSet) IsSuperset(other *HashSet) bool{
+    if other == nil {
+        return false
+    }
+    selfLen := set.Len()
+    otherLen := other.Len()
+
+    if otherLen == 0 {
+        return true
+    }
+
+    if selfLen < otherLen {
+        return false
+    }
+
+    for _, v := range other.Elements(){
+        if !set.Contains(v) {
+            return false
+        }
+    }
+    return true
+}
 
 func main(){
     set := NewHashSet()
