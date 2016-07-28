@@ -69,6 +69,29 @@ func (set *HashSet) Same(other *HashSet) bool {
     return true
 }
 
+//生成Hashset的一个快照，用slice存储，用于顺序遍历等场景
+//Hashset.m并非线程安全，所以在快照生成过程中可能发生变化
+//所以设计了actualLen，确保slice是完满的
+func (set *HashSet) Elements() []interface{}{
+    initialLen := len(set.m)
+    snapshot := make([]interface{}, initialLen)
+    actualLen := 0
+    for key := range set.m{
+        if actualLen >= initialLen{
+            snapshot = append(snapshot, key)
+        }else{
+            snapshot[actualLen] = key
+        }
+        actualLen++
+    }
+
+    if actualLen < initialLen{
+        snapshot = snapshot[:actualLen]  //二次切片，去除之前多申请的一部分
+    }
+
+    return snapshot
+}
+
 func main(){
     m := make(map[string]string)
     a := m["A"]
