@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+    "fmt"
+    "bytes"
+)
 
 /*
  * 利用内置的hash实现set功能，用key存储set的值
@@ -38,7 +41,7 @@ func (set *HashSet) Clear() {
 }
 
 //判断某个元素是否存在
-func (set *HashSet) Contains(e interface{}) {
+func (set *HashSet) Contains(e interface{}) bool{
     if _, ok := set.m[e]; ok{
         return true
     } else {
@@ -47,7 +50,7 @@ func (set *HashSet) Contains(e interface{}) {
 }
 
 //获取Set长度
-func (set *HashSet) Len() {
+func (set *HashSet) Len() int{
     return len(set.m)
 }
 
@@ -92,22 +95,29 @@ func (set *HashSet) Elements() []interface{}{
     return snapshot
 }
 
-func main(){
-    m := make(map[string]string)
-    a := m["A"]
+//管用方法签名String，fmt包的方法打印一个对象时候，如果有String方法，则会优先
+//以此为参考。可以尝试这个函数改名，则fmt打印的结果就会是原生的，否则就是定制的
+func (set *HashSet) String() string {
+    var buf bytes.Buffer
+    buf.WriteString("set{")
+    first := true
+    for key := range set.m {
+        if first {
+            first = false
+        } else {
+            buf.WriteString(", ")
+        }
+        buf.WriteString(fmt.Sprintf("%v", key))
+    }
+    buf.WriteString("}")
+    return buf.String()
+}
 
-    if v,ok := m["A"]; ok{
-        fmt.Println("Yes", v)
-    } else {
-        fmt.Println("No", v)
-    }
-    fmt.Println(a)
-    m["A"] = "abc"
-    a = m["A"]
-    if v,ok := m["A"]; ok{
-        fmt.Println("Yes", v)
-    } else {
-        fmt.Println("No", v)
-    }
-    fmt.Println(a)
+
+func main(){
+    set := NewHashSet()
+    set.Add("Fuck")
+    set.Add("Son")
+    set.Add("Bitch")
+    fmt.Println(set)
 }
