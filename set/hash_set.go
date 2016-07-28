@@ -46,6 +46,12 @@ func (set *HashSet) Contains(e interface{}) {
     }
 }
 
+//获取Set长度
+func (set *HashSet) Len() {
+    return len(set.m)
+}
+
+
 
 func main(){
     m := make(map[string]string)
