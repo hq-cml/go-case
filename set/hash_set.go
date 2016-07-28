@@ -51,7 +51,23 @@ func (set *HashSet) Len() {
     return len(set.m)
 }
 
+//判断HashSet是否相等（拥有相同的元素集合）
+func (set *HashSet) Same(other *HashSet) bool {
+    if other == nil {
+        return false
+    }
 
+    if set.Len() != other.Len() {
+        return false
+    }
+
+    for key := range set.m{ //range hash，只有一个接收值，得到的是key
+        if !other.Contains(key){
+            return false
+        }
+    }
+    return true
+}
 
 func main(){
     m := make(map[string]string)
