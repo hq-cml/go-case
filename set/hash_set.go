@@ -30,8 +30,39 @@ func (set *HashSet) Remove(e interface{}) {
     delete(set.m, e)
 }
 
+//清空set，有两个点说明~
+//1. 直接重新赋值set.m，旧的m交由垃圾回收器去回收
+//2. 注意接收者是*hashSet，否则无法达到
+func (set *HashSet) Clear() {
+    set.m = make(map[interface{}]bool)
+}
+
+//判断某个元素是否存在
+func (set *HashSet) Contains(e interface{}) {
+    if _, ok := set.m[e]; ok{
+        return true
+    } else {
+        return false
+    }
+}
+
+
 func main(){
-    m := make(map[string]bool)
+    m := make(map[string]string)
     a := m["A"]
-    fmt.Print(a)
+
+    if v,ok := m["A"]; ok{
+        fmt.Println("Yes", v)
+    } else {
+        fmt.Println("No", v)
+    }
+    fmt.Println(a)
+    m["A"] = "abc"
+    a = m["A"]
+    if v,ok := m["A"]; ok{
+        fmt.Println("Yes", v)
+    } else {
+        fmt.Println("No", v)
+    }
+    fmt.Println(a)
 }
