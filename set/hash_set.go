@@ -1,14 +1,13 @@
-package main
+package set
 
 import (
     "fmt"
     "bytes"
-    "go/doc"
 )
 
 /*
- * 利用内置的hash实现set功能，用key存储set的值
- * key用interface{}类型，表示set的值是任意类型
+ * 利用内置的hash实现set功能，HashSet类型实现了Set接口！！
+ * 用key存储set的值key用interface{}类型，表示set的值是任意类型
  * val用bool类型，因为1，省空间 2，用起来方便，可以表示是否存在等
  */
 type HashSet struct{
@@ -56,7 +55,8 @@ func (set *HashSet) Len() int{
 }
 
 //判断HashSet是否相等（拥有相同的元素集合）
-func (set *HashSet) Same(other *HashSet) bool {
+//func (set *HashSet) Same(other *HashSet) bool {
+func (set *HashSet) Same(other Set) bool {
     if other == nil {
         return false
     }
@@ -114,34 +114,3 @@ func (set *HashSet) String() string {
     return buf.String()
 }
 
-//真包含判断，或者说超集判断
-func (set *HashSet) IsSuperset(other *HashSet) bool{
-    if other == nil {
-        return false
-    }
-    selfLen := set.Len()
-    otherLen := other.Len()
-
-    if otherLen == 0 {
-        return true
-    }
-
-    if selfLen < otherLen {
-        return false
-    }
-
-    for _, v := range other.Elements(){
-        if !set.Contains(v) {
-            return false
-        }
-    }
-    return true
-}
-
-func main(){
-    set := NewHashSet()
-    set.Add("Fuck")
-    set.Add("Son")
-    set.Add("Bitch")
-    fmt.Println(set)
-}
