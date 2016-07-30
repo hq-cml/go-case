@@ -155,3 +155,12 @@ func (keys *myKeys) isAcceptableElem(k interface{}) bool {
 
     return true
 }
+
+//golang惯例，“构造”函数
+func NewKeys(compareFunc CompareFunction, elemType reflect.Type) Keys {
+    return &myKeys{
+        container:    make([]interface{}, 0),
+        compareFunc:  compareFunc,
+        elemType:     elemType,
+    }
+}
