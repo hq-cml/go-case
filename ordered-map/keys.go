@@ -85,8 +85,35 @@ func (keys *myKeys) Remove(k interface{}) bool {
     keys.container = append(keys.container[0:index], keys.container[index+1:]...)
     return true
 }
-
-
+//Clear方法
+func (keys *myKeys) Clear() {
+    keys.container = make([]interface{}, 0)
+}
+//Get方法
+func (keys *myKeys) Get(index int) interface{} {
+    if index >= keys.Len() {
+        return nil
+    }
+    return keys.container[index]
+}
+//GetAll，获得全部keys，放在一个slice中作为快照返回
+func (keys *myKeys) GetAll() []interface{} {
+    initialLen := len(keys.container)
+    snapshot := make([]interface{}, initialLen)
+    actualLen := 0
+    for _, key := range keys.container{
+        if actualLen >= initialLen{
+            snapshot = append(snapshot, key)
+        }else{
+            snapshot[actualLen] = key
+        }
+        actualLen++
+    }
+    if actualLen < initialLen{
+        snapshot = snapshot[:actualLen]  //二次切片，去除之前多申请的一部分
+    }
+    return snapshot
+}
 
 //判断k是否是可以存入myKeys.container的合法值
 func (keys *myKeys) isAcceptableElem(k interface{}) bool {
