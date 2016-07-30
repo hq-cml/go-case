@@ -22,7 +22,7 @@ type Keys interface {
     GetAll() []interface{}         //全部获取，存于一个切片中
     ElemType() reflect.Type        //获取key运行时的类型
     CompareFunc() CompareFunction  //获取运行时用于比较key大小的具体方法
-    Search(k interface{}) (index int, contains boo)  //查找key
+    Search(k interface{}) (index int, contains bool)  //查找key
 }
 
 //自定义类型myKeys
@@ -59,7 +59,23 @@ func (keys *myKeys) Add(k interface{}) bool {
     sort.Sort(keys)
     return ture
 }
+//Search方法，返回值已命名；利用了sort.Search方法
+func (keys *myKeys) Search(k interface{}) (index int, contains bool) {
+    ok := keys.isAcceptableElem(k)
+    if !ok {
+        return
+    }
 
+    //sort.Serach的第二个参数是匿名函数一枚，功能是判断i对应的元素，是否>=要寻找的k值
+    //仔细看sort.Search的源码发现，返回值index其实是k对应的索引id(存在)，或者是大于k的最小的索引id(不存在)
+    index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k) >= 0 })
+
+    //由于index并非一定是找到了的索引id，所以要在此确认一下
+    if index < keys.Len() && keys.container[index] == k {
+        contains = true //给命名返回值赋值，golang特色
+    }
+    return
+}
 
 
 
