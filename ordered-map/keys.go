@@ -65,7 +65,6 @@ func (keys *myKeys) Search(k interface{}) (index int, contains bool) {
     if !ok {
         return
     }
-
     //sort.Serach的第二个参数是匿名函数一枚，功能是判断i对应的元素，是否>=要寻找的k值
     //仔细看sort.Search的源码发现，返回值index其实是k对应的索引id(存在)，或者是大于k的最小的索引id(不存在)
     index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k) >= 0 })
@@ -76,7 +75,16 @@ func (keys *myKeys) Search(k interface{}) (index int, contains bool) {
     }
     return
 }
-
+//Remove方法
+func (keys *myKeys) Remove(k interface{}) bool {
+    index, contains := keys.Search(k)
+    if !contains {
+        return false
+    }
+    //利用再切片的方式，实现切片删除指定元素，注意后面要有三个点
+    keys.container = append(keys.container[0:index], keys.container[index+1:]...)
+    return true
+}
 
 
 
