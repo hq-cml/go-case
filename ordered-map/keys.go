@@ -4,6 +4,7 @@ import(
     "fmt"
     "sort"
     "reflect"
+    "bytes"
 )
 
 //函数类型声明
@@ -114,7 +115,34 @@ func (keys *myKeys) GetAll() []interface{} {
     }
     return snapshot
 }
-
+//ElemType方法，获取key运行时的类型
+func (keys *myKeys) ElemType() reflect.Type {
+    return keys.elemType
+}
+//CompareFunc方法，获取运行时用于比较key大小的具体方法
+func (keys *myKeys) CompareFunc() CompareFunction {
+    return keys.compareFunc
+}
+//String方法，golang惯例，提供给fmt包
+func (keys *myKeys) String() string {
+    var buf bytes.Buffer
+    buf.WriteString("Keys<")
+    buf.WriteString(keys.elemType.Kind().String())
+    buf.WriteString(">{")
+    first := true
+    buf.WriteString("[")
+    for _, key := range keys.container {
+        if first {
+            first = false
+        } else {
+            buf.WriteString(" ")
+        }
+        buf.WriteString(fmt.Sprintf("%v", key))
+    }
+    buf.WriteString("]")
+    buf.WriteString("}")
+    return buf.String()
+}
 //判断k是否是可以存入myKeys.container的合法值
 func (keys *myKeys) isAcceptableElem(k interface{}) bool {
     if k == nil {
