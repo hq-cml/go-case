@@ -28,16 +28,16 @@ type Keys interface {
 //自定义类型myKeys
 type myKeys struct {
     container    []interface{}    //keys的实际容器，keys元素可以是任意类型
-    // compareFunc的结果值：
-    //   小于0: 第一个参数小于第二个参数
-    //   等于0: 第一个参数等于第二个参数
-    //   大于0: 第一个参数大于第二个参数
+    //compareFunc的结果值：
+    //小于0: 第一个参数小于第二个参数
+    //等于0: 第一个参数等于第二个参数
+    //大于0: 第一个参数大于第二个参数
     compareFunc  CompareFunction  //函数也是一种类型，compareFunc负责比较元素的大小，具体实现交给上层开发者
     elemType     reflect.Type     //存储keys元素的实际类型，（运行时确定）
 }
 
 //让类型*myKeys实现Keys接口:
-//首先实现嵌入接口sort.Interface：Len，Less，Swap
+//首先，实现嵌入接口sort.Interface：Len，Less，Swap
 func (keys *myKeys) Len() int{
     return len(keys.container)
 }
@@ -46,4 +46,33 @@ func (keys *myKeys) Less(i, j int) bool{
 }
 func (keys *myKeys) Swap(i, j int){
     keys.container[i], keys.container[j] = keys.container[j], keys.container[i]
+}
+
+//其次，实现接口Keys的其他方法
+//Add方法
+func (keys *myKeys) Add(k interface{}) bool {
+    ok := keys.isAcceptableElem(k)
+    if !ok {
+        return false
+    }
+    keys.container = append(keys.container, k)
+    sort.Sort(keys)
+    return ture
+}
+
+
+
+
+
+//判断k是否是可以存入myKeys.container的合法值
+func (keys *myKeys) isAcceptableElem(k interface{}) bool {
+    if k == nil {
+        return false
+    }
+    //获取k的实际类型，与elemType进行比较
+    if reflect.TypeOf(k) != keys.elemType {
+        return false
+    }
+
+    return true
 }
