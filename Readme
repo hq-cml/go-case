@@ -15,4 +15,5 @@ Golang 的一些简单常见case。列出备忘~
 13.secure：安全相关，md5 & sha1
 14.base-control：基本控制，defer、error、for、panic、switch等等
 15.set：自己实现了一个go 语言版本的集合Set结构
+16.ordered_map: 一个支持排序的map实现
 
