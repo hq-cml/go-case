@@ -7,7 +7,8 @@ import (
     "io"
 )
 
-func main() {
+//最简单实例：执行echo -n "go cmd"
+func cmd_1() {
     //创建一个exec.Cmd类型变量
     cmd0 := exec.Command("echo", "-n", "Go cmd")
 
@@ -51,5 +52,9 @@ func main() {
             fmt.Println(string(output0))
         }
     }
+}
+
+func main() {
+    cmd_1()
 
 }
