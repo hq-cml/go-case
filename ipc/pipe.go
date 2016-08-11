@@ -8,7 +8,7 @@ import (
 )
 
 //最简单实例：执行echo -n "go cmd"
-func cmd_1() {
+func pipeDemo1() {
     //创建一个exec.Cmd类型变量
     cmd0 := exec.Command("echo", "-n", "Go cmd")
 
@@ -54,7 +54,14 @@ func cmd_1() {
     }
 }
 
-func main() {
-    cmd_1()
+//执行命令类似： ps aux | grep http
+func pipeDemo2(){
+    //创建cmd变量
+    cmd1 := exec.Command("ps", "aux")
+    cmd2 := exec.Command("grep", "http")
+}
 
+func main() {
+    pipeDemo1()
+    pipeDemo2()
 }
