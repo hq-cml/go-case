@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "net"
+    "time"
 )
 
 const (
@@ -36,6 +37,16 @@ func tcpServer() {
         }
         printLog("Established a connection with a client application. (remote address: %s)\n", conn.RemoteAddr())
         go handleConn(conn)
+    }
+}
+
+func tcpClient(id int) {
+    //defer wg.Done()
+
+    //建立连接
+    conn, err := net.DialTimeout(SERVER_PROTOCAL, SERVER_ADDRESS, 2*time.Second)
+    if err != nil {
+        printLog("Dial error: %s (client[%d])", err, id)
     }
 }
 
