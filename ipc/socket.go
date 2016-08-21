@@ -79,6 +79,14 @@ func read(conn net.Conn) (string, error) {
 //	return string(readBytes[:len(readBytes)-1]), nil
 //}
 
+//write方法，将错误交个上层梳理
+func write(conn net.Conn, content string) (int, error) {
+    var buffer bytes.Buffer
+    buffer.WriteString(content) //将写入内容放入缓冲区
+    buffer.WriteByte(DELIMITER) //定界符
+    return conn.Write(buffer.Bytes())
+}
+
 func main() {
 
 }
