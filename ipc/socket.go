@@ -10,6 +10,9 @@ import (
     "time"
     "bytes"
     "io"
+    "strconv"
+    "errors"
+    "math"
 )
 
 const (
@@ -75,16 +78,6 @@ func read(conn net.Conn) (string, error) {
     return buffer.String(), nil //返回
 }
 
-// 法二：利用bufio来实现上述read方法
-//func read(conn net.Conn) (string, error) {
-//	reader := bufio.NewReader(conn)
-//	readBytes, err := reader.ReadBytes(DELIMITER)
-//	if err != nil {
-//		return "", err
-//	}
-//	return string(readBytes[:len(readBytes)-1]), nil
-//}
-
 //write方法，将错误交个上层梳理
 func write(conn net.Conn, content string) (int, error) {
     var buffer bytes.Buffer
@@ -102,9 +95,9 @@ func handleConn(conn net.Conn) {
 
     //无限循环，等待干活
     for {
-        conn.SetReadDeadline(time.Now().Add(10 * time.Second)) 
+        conn.SetReadDeadline(time.Now().Add(10 * time.Second))  //设置读取10秒超时
         strReq, err := read(conn)
-        if err != nil {
+        if err != nil { //处理read可能引发的各类错误
             if err == io.EOF {
                 printLog("The connection is closed by another side. (Server)\n")
             } else {
@@ -113,7 +106,7 @@ func handleConn(conn net.Conn) {
             break
         }
         printLog("Received request: %s (Server)\n", strReq)
-        i32Req, err := convertToInt32(strReq)
+        i32Req, err := convertToInt32(strReq)//字符串转int32
         if err != nil {
             n, err := write(conn, err.Error())
             if err != nil {
@@ -122,8 +115,10 @@ func handleConn(conn net.Conn) {
             printLog("Sent response (written %d bytes): %s (Server)\n", n, err)
             continue
         }
-        f64Resp := cbrt(i32Req)
+        f64Resp := cbrt(i32Req)//求立方根
         respMsg := fmt.Sprintf("The cube root of %d is %f.", i32Req, f64Resp)
+
+        //返回数据给clinet
         n, err := write(conn, respMsg)
         if err != nil {
             printLog("Write Error: %s (Server)\n", err)
@@ -132,6 +127,24 @@ func handleConn(conn net.Conn) {
     }
 }
 
+//字符串转int32
+func convertToInt32(str string) (int32, error) {
+    num, err := strconv.Atoi(str)
+    if err != nil {
+        printLog(fmt.Sprintf("Parse Error: %s\n", err))
+        return 0, errors.New(fmt.Sprintf("'%s' is not integer!", str))
+    }
+    if num > math.MaxInt32 || num < math.MinInt32 {
+        printLog(fmt.Sprintf("Convert Error: The integer %s is too large/small.\n", num))
+        return 0, errors.New(fmt.Sprintf("'%s' is not 32-bit integer!", num))
+    }
+    return int32(num), nil
+}
+
+//求立方根
+func cbrt(param int32) float64 {
+    return math.Cbrt(float64(param))
+}
 func main() {
 
 }
