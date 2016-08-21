@@ -13,6 +13,8 @@ import (
     "strconv"
     "errors"
     "math"
+    "sync"
+    "math/rand"
 )
 
 const (
@@ -21,6 +23,7 @@ const (
     DELIMITER       = '\t'            //定界符
 )
 
+var wg sync.WaitGroup //协调main，tcpServer，tcpClient
 var logSn = 1
 
 func printLog(format string, args ...interface{}) {
@@ -59,7 +62,7 @@ func tcpClient(id int) {
     if err != nil {
         printLog("Dial error: %s (client[%d])", err, id)
     }
-    defer conn.Close()
+    defer conn.Close() //客户端主动关闭连接
     printLog("Connected to server. (remote address: %s, local address: %s) (Client[%d])\n",
         conn.RemoteAddr(), conn.LocalAddr(), id)
 
@@ -176,6 +179,15 @@ func convertToInt32(str string) (int32, error) {
 func cbrt(param int32) float64 {
     return math.Cbrt(float64(param))
 }
-func main() {
 
+func main() {
+    var clientCnt int
+    clientCnt = 5
+    wg.Add(clientCnt*2)
+    go tcpServer()
+    time.Sleep(500 * time.Millisecond) //等待server准备就绪
+    for i:=1; i<=clientCnt; i++ {
+        go tcpClient(i)
+    }
+    wg.Wait()
 }
