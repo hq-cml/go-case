@@ -1,10 +1,15 @@
 package main
 
+/*
+ * TCP server & client例子：
+ * server端计算client传来的数字，求立方根之后返回
+ */
 import (
     "fmt"
     "net"
     "time"
     "bytes"
+    "io"
 )
 
 const (
@@ -28,7 +33,7 @@ func tcpServer() {
         printLog("Listen Error: %s\n", err)
         return
     }
-    defer listener.Close()
+    defer listener.Close() //注册析构listener的行为
     printLog("Got listener for the server. (local address: %s)\n", listener.Addr())
 
     for {
@@ -37,6 +42,7 @@ func tcpServer() {
             printLog("Accept Error: %s\n", err)
         }
         printLog("Established a connection with a client application. (remote address: %s)\n", conn.RemoteAddr())
+        //启动处理子协程
         go handleConn(conn)
     }
 }
@@ -85,6 +91,45 @@ func write(conn net.Conn, content string) (int, error) {
     buffer.WriteString(content) //将写入内容放入缓冲区
     buffer.WriteByte(DELIMITER) //定界符
     return conn.Write(buffer.Bytes())
+}
+
+//实际处理的子协程
+func handleConn(conn net.Conn) {
+    defer func() {  //注册子协程的析构操作
+        conn.Close()
+        wg.Done()
+    }()
+
+    //无限循环，等待干活
+    for {
+        conn.SetReadDeadline(time.Now().Add(10 * time.Second)) 
+        strReq, err := read(conn)
+        if err != nil {
+            if err == io.EOF {
+                printLog("The connection is closed by another side. (Server)\n")
+            } else {
+                printLog("Read Error: %s (Server)\n", err)
+            }
+            break
+        }
+        printLog("Received request: %s (Server)\n", strReq)
+        i32Req, err := convertToInt32(strReq)
+        if err != nil {
+            n, err := write(conn, err.Error())
+            if err != nil {
+                printLog("Write Error (written %d bytes): %s (Server)\n", err)
+            }
+            printLog("Sent response (written %d bytes): %s (Server)\n", n, err)
+            continue
+        }
+        f64Resp := cbrt(i32Req)
+        respMsg := fmt.Sprintf("The cube root of %d is %f.", i32Req, f64Resp)
+        n, err := write(conn, respMsg)
+        if err != nil {
+            printLog("Write Error: %s (Server)\n", err)
+        }
+        printLog("Sent response (written %d bytes): %s (Server)\n", n, respMsg)
+    }
 }
 
 func main() {
