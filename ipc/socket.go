@@ -50,13 +50,44 @@ func tcpServer() {
     }
 }
 
+//创建TCP的client
 func tcpClient(id int) {
-    //defer wg.Done()
+    defer wg.Done()
 
     //建立连接
     conn, err := net.DialTimeout(SERVER_PROTOCAL, SERVER_ADDRESS, 2*time.Second)
     if err != nil {
         printLog("Dial error: %s (client[%d])", err, id)
+    }
+    defer conn.Close()
+    printLog("Connected to server. (remote address: %s, local address: %s) (Client[%d])\n",
+        conn.RemoteAddr(), conn.LocalAddr(), id)
+
+    time.Sleep(200 * time.Millisecond) //睡200毫秒，让日志显示更清晰
+
+    //发送包数目：5
+    requestNumber := 5
+    conn.SetDeadline(time.Now().Add(5 * time.Millisecond)) //超时：5毫秒
+    for i := 0; i < requestNumber; i++ {
+        i32Req := rand.Int31()
+        n, err := write(conn, fmt.Sprintf("%d", i32Req))
+        if err != nil {
+            printLog("Write Error: %s (Client[%d])\n", err, id)
+            continue
+        }
+        printLog("Sent request (written %d bytes): %d (Client[%d])\n", n, i32Req, id)
+    }
+    for j := 0; j < requestNumber; j++ {
+        strResp, err := read(conn)
+        if err != nil {
+            if err == io.EOF {
+                printLog("The connection is closed by another side. (Client[%d])\n", id)
+            } else {
+                printLog("Read Error: %s (Client[%d])\n", err, id)
+            }
+            break
+        }
+        printLog("Received response: %s (Client[%d])\n", strResp, id)
     }
 }
 
