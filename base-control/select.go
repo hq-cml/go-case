@@ -22,6 +22,10 @@ func genTimeout() chan bool {
 
 func main(){
     ch := make(chan int, 10)
+    //e 和 ok都需要实现初始化完毕，因为：
+    //下面的case中不能使用:=，只能使用=，使用了前者就会变成小作用域临时变量
+    //哪怕当中有一个同名的变量也是如此，两个变量都会成为临时。那么下面的
+    //跳出for的break将永远失去执行机会
     var e int
     ok := true
 
