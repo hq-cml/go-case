@@ -7,8 +7,8 @@ import (
     "fmt"
 )
 
-//超时发生函数
-func genTimeout() chan bool {
+//超时发生函数：Channel版本
+func genTimeoutChannel() chan bool {
     fmt.Println("Geneate Timer")
     timeout := make(chan bool, 1)
     //timeout := make(chan bool) //这个地方也可以使用不带缓冲版本，效果相同
@@ -34,6 +34,15 @@ func genTimeoutTimer() chan bool {
     }()
 
     return timeout
+}
+
+//超时发生函数
+func genTimeout(t int) chan bool {
+    if 1 == t {
+        return genTimeoutTimer()
+    }else{
+        return genTimeoutChannel()
+    }
 }
 
 func main(){
@@ -64,7 +73,7 @@ func main(){
             } else {
                 fmt.Println("Got", e)
             }
-        case ok = <-genTimeoutTimer(): //每次select的超时时间是相同的5s
+        case ok = <-genTimeout(0): //每次select的超时时间是相同的5s
             fmt.Println("Time out. End")
             break //跳出select
         }
