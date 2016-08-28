@@ -9,11 +9,27 @@ import (
 
 //超时发生函数
 func genTimeout() chan bool {
+    fmt.Println("Geneate Timer")
     timeout := make(chan bool, 1)
+    //timeout := make(chan bool) //这个地方也可以使用不带缓冲版本，效果相同
 
     //匿名goroutine，在t秒之后，向timeout中产出一个bool值
     go func() {
         time.Sleep(5*time.Second)
+        timeout <- false
+    }()
+
+    return timeout
+}
+
+//超时发生函数：官方定时器版本
+func genTimeoutTimer() chan bool {
+    fmt.Println("Geneate Timer")
+    timeout := make(chan bool, 1)
+
+    go func() {
+        timer := time.NewTimer(5*time.Second)
+        <- timer.C
         timeout <- false
     }()
 
@@ -48,7 +64,7 @@ func main(){
             } else {
                 fmt.Println("Got", e)
             }
-        case ok = <-genTimeout(): //每次select的超时时间是相同的5s
+        case ok = <-genTimeoutTimer(): //每次select的超时时间是相同的5s
             fmt.Println("Time out. End")
             break //跳出select
         }
