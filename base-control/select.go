@@ -22,7 +22,7 @@ func genTimeoutChannel() chan bool {
     return timeout
 }
 
-//超时发生函数：官方定时器版本
+//超时发生函数：官方定时器版本1
 func genTimeoutTimer() chan bool {
     fmt.Println("Geneate Timer")
     timeout := make(chan bool, 1)
@@ -36,11 +36,27 @@ func genTimeoutTimer() chan bool {
     return timeout
 }
 
+//超时发生函数：官方定时器版本2
+func genTimeoutTimerFunc() chan bool {
+    fmt.Println("Geneate Timer")
+    timeout := make(chan bool, 1)
+
+    f := func() {
+        timeout <- false
+    }
+
+    time.AfterFunc(5*time.Second, f)
+
+    return timeout
+}
+
 //超时发生函数
 func genTimeout(t int) chan bool {
     if 1 == t {
         return genTimeoutTimer()
-    }else{
+    }else if 2 == t {
+        return genTimeoutTimerFunc()
+    } else {
         return genTimeoutChannel()
     }
 }
@@ -73,7 +89,7 @@ func main(){
             } else {
                 fmt.Println("Got", e)
             }
-        case ok = <-genTimeout(0): //每次select的超时时间是相同的5s
+        case ok = <-genTimeout(2): //每次select的超时时间是相同的5s
             fmt.Println("Time out. End")
             break //跳出select
         }
