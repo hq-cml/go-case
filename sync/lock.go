@@ -21,8 +21,30 @@ type lockDataFile struct {
 }
 
 //*lockDataFile 实现DataFileIntfs
+//读取一个数据块
+func (df *lockDataFile)Read() (rsn int64, d Data, err error) {
+    
+}
 
+//写入一个数据块
+func (df *lockDataFile)Write(d Data) (wsn int64, err error) {
 
+}
+
+//获取最后读取的数据快序列号
+func (df *lockDataFile)Rsn() int64 {
+
+}
+
+//获取最后写入的数据快序列号
+func (df *lockDataFile)Wsn() int64 {
+
+}
+
+//获取数据块的长度
+func (df *lockDataFile)DataLen() uint32 {
+
+}
 
 //惯例New，通常返回值是某种接口的实现 + error的实现
 func NewLockDataFile(path string, data_len uint32) (DataFileIntfs, error) {
