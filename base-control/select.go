@@ -45,6 +45,7 @@ func genTimeoutTimerFunc() chan bool {
         timeout <- false
     }
 
+    //异步的方式自动执行，和上个版本启动goroutinue效果相同
     time.AfterFunc(5*time.Second, f)
 
     return timeout
