@@ -1,4 +1,4 @@
-package cond
+package atomic
 
 import (
     "os"
@@ -6,10 +6,10 @@ import (
     "errors"
     "io"
     mysync "github.com/hq-cml/go-case/sync"
+    "sync/atomic"
 )
 /*
- * 改进了lock.go的一个问题：互斥锁 & 读写锁 + 条件变量
- * 这个版本仍然可以改进，去掉纯粹的锁，见atomic.go
+ * 比cond.go更加改进，去掉了互斥锁，只使用 读写锁 + 条件变量
  */
 
 //基于锁的DataFile实现
@@ -18,8 +18,6 @@ type condDataFile struct {
     f_rwmutex   sync.RWMutex //读写锁，用于保护文件f本身的操作
     w_offset    int64        //写操作的偏移量
     r_offset    int64        //读操作偏移量
-    w_mutex     sync.Mutex   //互斥锁，用于写操作保护w_offset
-    r_mutex     sync.Mutex   //互斥锁，用于读操作保护r_offset
     data_len    uint32       //数据块长度
     r_cond      *sync.Cond   //和f读操作互斥量绑定的条件变量
 }
@@ -27,12 +25,15 @@ type condDataFile struct {
 //*lockDataFile 实现DataFileIntfs
 //读取一个数据块，返回rsn表示读取到的数据块的编号
 func (df *condDataFile)Read() (rsn int64, d mysync.Data, err error) {
-    //获取读取偏移量
+    //获取读取偏移量，利用原子操作替代锁
     var offset int64
-    df.r_mutex.Lock()
-    offset = df.r_offset
-    df.r_offset += int64(df.data_len)
-    df.r_mutex.Unlock()
+    for {
+        offset = atomic.LoadInt64(&df.r_offset) //原子读取
+        //原子交换试探（乐观锁）
+        if atomic.CompareAndSwapInt64(&df.r_offset, offset, (offset + int64(df.data_len))) {
+            break
+        }
+    }
 
     //读取文件数据块
     rsn = offset / int64(df.data_len)
@@ -58,12 +59,15 @@ func (df *condDataFile)Read() (rsn int64, d mysync.Data, err error) {
 
 //写入一个数据块
 func (df *condDataFile)Write(d mysync.Data) (wsn int64, err error) {
-    //获取写偏移量
+    //获取写偏移量，利用原子操作替代锁
     var offset int64
-    df.w_mutex.Lock()
-    offset = df.w_offset
-    df.w_offset += int64(df.data_len)
-    df.w_mutex.Unlock()
+    for {
+        offset = atomic.LoadInt64(&df.w_offset) //原子读取
+        //原子交换试探（乐观锁）
+        if atomic.CompareAndSwapInt64(&df.w_offset, offset, (offset + int64(df.data_len))) {
+            break
+        }
+    }
 
     //写入一个数据块
     wsn = offset / int64(df.data_len)
@@ -83,16 +87,14 @@ func (df *condDataFile)Write(d mysync.Data) (wsn int64, err error) {
 
 //获取最后读取的数据快序列号
 func (df *condDataFile)Rsn() int64 {
-    df.r_mutex.Lock()
-    defer df.r_mutex.Unlock()
-    return df.r_offset / int64(df.data_len)
+    offset := atomic.LoadInt64(&df.r_offset)
+    return offset / int64(df.data_len)
 }
 
 //获取最后写入的数据快序列号
 func (df *condDataFile)Wsn() int64 {
-    df.w_mutex.Lock()
-    defer df.w_mutex.Unlock()
-    return df.w_offset / int64(df.data_len)
+    offset := atomic.LoadInt64(&df.w_offset)
+    return offset / int64(df.data_len)
 }
 
 //获取数据块的长度
