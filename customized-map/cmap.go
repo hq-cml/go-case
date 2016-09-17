@@ -22,8 +22,87 @@ type concurrentMap struct {
     rwmutext  sync.RWMutex                 //配一把读写锁，保证并发安全
 }
 
-//*ConcurrentMap实现ConcurrentMapIntfs
+//校验k，v对儿是否为空即动态类型是否符合要求
+func (cmap *concurrentMap) checkPair(k, v interface{}) bool {
+    if k == nil || reflect.TypeOf(k) != cmap.keyType {
+        return false
+    }
 
+    if v == nil || reflect.TypeOf(v) != cmap.valType {
+        return false
+    }
+    return true
+}
+
+/************** ConcurrentMap实现ConcurrentMapIntfs **********************/
+// 获取给定键值对应的元素值。若没有对应元素值则返回nil。
+func (cmap *concurrentMap) Get(key interface{}) interface{} {
+    //读锁
+    cmap.rwmutext.RLock()
+    defer cmap.rwmutext.RUnlock()
+    return cmap.m[key]
+}
+
+//添加键值对，并返回与给定键值对应的旧的元素值。若没有旧元素值则返回(nil, true)。
+func (cmap *concurrentMap) Put(key interface{}, val interface{}) (interface{}, bool) {
+    if cmap.checkPair(key, val) {
+        return nil, false
+    }
+    //写锁
+    cmap.rwmutext.Lock()
+    defer cmap.rwmutext.Unlock()
+
+    old_val := cmap.m[key]
+    cmap.m[key] = val
+    return old_val, true
+}
+
+// 删除与给定键值对应的键值对，并返回旧的元素值。若没有旧元素值则返回nil
+func (cmap *concurrentMap) Remove(key interface{}) interface{} {
+
+}
+
+// 清除所有的键值对。
+func (cmap *concurrentMap) Clear() {
+
+}
+
+
+
+// 获取键值对的数量。
+func (cmap *concurrentMap) Len() int {
+
+}
+
+// 判断是否包含给定的键值。
+func (cmap *concurrentMap) Contains(key interface{}) bool {
+
+}
+
+// 获取已排序的key所组成的切片值。
+func (cmap *concurrentMap) Keys() []interface{} {
+
+}
+
+// 获取已排序的元素值所组成的切片值。
+func (cmap *concurrentMap) Vals() []interface{} {
+
+}
+
+// 获取已包含的键值对所组成的字典值。
+func (cmap *concurrentMap) ToMap() map[interface{}]interface{} {
+
+}
+
+// 获取键的类型。
+func (cmap *concurrentMap) KeyType() reflect.Type {
+
+}
+
+// 获取元素的类型。
+func (cmap *concurrentMap) ValType() reflect.Type {
+
+}
 
 //惯例New函数
 func NewConcurrentMap(keyType, valType reflect.Type) ConcurrentMapIntfs {
