@@ -1,4 +1,4 @@
-package ordered_map
+package customized_map
 
 import(
     "fmt"
