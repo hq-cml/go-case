@@ -1,17 +1,20 @@
-package main
+package lock
 
 import (
     "os"
     "sync"
     "errors"
     "io"
+    mysync "github.com/hq-cml/go-case/sync"
 )
 /*
  * 锁的使用：互斥锁 & 读写锁
+ * 这个版本有一个不太好的地方，就是Read中频繁的RUnlock，既不优雅，也不安全
+ * 改进的办法是引入条件变量cond，见cond.go
  */
 
 //基于锁的DataFile实现
-type lockDataFile struct {
+type condDataFile struct {
     f           *os.File     //文件句柄
     f_rwmutex   sync.RWMutex //读写锁，用于保护文件本身的操作
     w_offset    int64        //写操作的偏移量
@@ -23,7 +26,7 @@ type lockDataFile struct {
 
 //*lockDataFile 实现DataFileIntfs
 //读取一个数据块，返回rsn表示读取到的数据块的编号
-func (df *lockDataFile)Read() (rsn int64, d Data, err error) {
+func (df *condDataFile)Read() (rsn int64, d mysync.Data, err error) {
     //获取读取偏移量
     var offset int64
     df.r_mutex.Lock()
@@ -58,7 +61,7 @@ func (df *lockDataFile)Read() (rsn int64, d Data, err error) {
 }
 
 //写入一个数据块
-func (df *lockDataFile)Write(d Data) (wsn int64, err error) {
+func (df *condDataFile)Write(d mysync.Data) (wsn int64, err error) {
     //获取写偏移量
     var offset int64
     df.w_mutex.Lock()
@@ -82,26 +85,26 @@ func (df *lockDataFile)Write(d Data) (wsn int64, err error) {
 }
 
 //获取最后读取的数据快序列号
-func (df *lockDataFile)Rsn() int64 {
+func (df *condDataFile)Rsn() int64 {
     df.r_mutex.Lock()
     defer df.r_mutex.Unlock()
     return df.r_offset / int64(df.data_len)
 }
 
 //获取最后写入的数据快序列号
-func (df *lockDataFile)Wsn() int64 {
+func (df *condDataFile)Wsn() int64 {
     df.w_mutex.Lock()
     defer df.w_mutex.Unlock()
     return df.w_offset / int64(df.data_len)
 }
 
 //获取数据块的长度
-func (df *lockDataFile)DataLen() uint32 {
+func (df *condDataFile)DataLen() uint32 {
     return df.data_len
 }
 
 //惯例New，通常返回值是某种接口的实现 + error的实现
-func NewLockDataFile(path string, data_len uint32) (DataFileIntfs, error) {
+func NewLockDataFile(path string, data_len uint32) (mysync.DataFileIntfs, error) {
     if data_len == 0 {
         return nil, errors.New("Invalid data length!")
     }
@@ -111,7 +114,7 @@ func NewLockDataFile(path string, data_len uint32) (DataFileIntfs, error) {
         return nil, err
     }
 
-    df := &lockDataFile{
+    df := &condDataFile{
         f        : f,
         data_len : data_len,
     }

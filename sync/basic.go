@@ -1,4 +1,4 @@
-package main
+package mysync
 
 /*
  * golang的同步机制：
