@@ -58,7 +58,7 @@ func (keys *myKeys) Add(k interface{}) bool {
     }
     keys.container = append(keys.container, k)
     sort.Sort(keys)
-    return ture
+    return true
 }
 //Search方法，返回值已命名；利用了sort.Search方法
 func (keys *myKeys) Search(k interface{}) (index int, contains bool) {

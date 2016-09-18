@@ -45,13 +45,12 @@ func (cmap *concurrentMap) Get(key interface{}) interface{} {
 
 //添加键值对，并返回与给定键值对应的旧的元素值。若没有旧元素值则返回(nil, true)。
 func (cmap *concurrentMap) Put(key interface{}, val interface{}) (interface{}, bool) {
-    if cmap.checkPair(key, val) {
+    if !cmap.checkPair(key, val) {
         return nil, false
     }
     //写锁
     cmap.rwmutext.Lock()
     defer cmap.rwmutext.Unlock()
-
     old_val := cmap.m[key]
     cmap.m[key] = val
     return old_val, true
