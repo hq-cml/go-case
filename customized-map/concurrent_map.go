@@ -1,6 +1,6 @@
 package customized_map
 /*
- * 定制化map之：并发安全的map实现
+ * 定制化map之：并发安全的map实现: ConcurrentMap
  */
 import (
     "bytes"
@@ -149,4 +149,30 @@ func NewConcurrentMap(keyType, valType reflect.Type) ConcurrentMapIntfs {
         valType: valType,
         m      : make(map[interface{}]interface{}),
     }
+}
+
+//String方法
+func (cmap *concurrentMap) String() string {
+    var buf bytes.Buffer
+    buf.WriteString("ConcurrentMap<")
+    buf.WriteString(cmap.keyType.Kind().String())
+    buf.WriteString(",")
+    buf.WriteString(cmap.valType.Kind().String())
+    buf.WriteString(">{")
+    first := true
+    //读锁
+    cmap.rwmutext.RLock()
+    defer cmap.rwmutext.RUnlock()
+    for k, v := range cmap.m {
+        if first {
+            first = false
+        } else {
+            buf.WriteString(" ")
+        }
+        buf.WriteString(fmt.Sprintf("%v", k))
+        buf.WriteString(":")
+        buf.WriteString(fmt.Sprintf("%v", v))
+    }
+    buf.WriteString("}")
+    return buf.String()
 }
