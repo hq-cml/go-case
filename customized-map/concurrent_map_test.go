@@ -35,39 +35,6 @@ func TestFloat64Cmap(t *testing.T) {
     test(t, newFunc, genFunc, genFunc, reflect.Float64, reflect.Float64)
 }
 
-//测试string型cmap
-func TestStringCmap(t *testing.T) {
-    newCmap := func() ConcurrentMapIntfs {
-        keyType := reflect.TypeOf(string(2))
-        valType := keyType
-        return NewConcurrentMap(keyType, valType)
-    }
-    genFunc := func() interface{} { return genRandString() }
-    test(t, newCmap, genFunc, genFunc, reflect.String, reflect.String)
-}
-
-func genRandString() string {
-    var buff bytes.Buffer
-    var prev string
-    var curr string
-    for i := 0; buff.Len() < 3; i++ {
-        curr = string(genRandAZAscii())
-        if curr == prev {
-            continue
-        }
-        prev = curr
-        buff.WriteString(curr)
-    }
-    return buff.String()
-}
-
-func genRandAZAscii() int {
-    min := 65 // A
-    max := 90 // Z
-    rand.Seed(time.Now().UnixNano())
-    return min + rand.Intn(max-min)
-}
-
 func test(t *testing.T, newConcurrentMap func() ConcurrentMapIntfs, genKey func() interface{}, genVal func() interface{}, keyKind reflect.Kind, valKind reflect.Kind) {
     mapType := fmt.Sprintf("ConcurrentMap<keyType=%s, elemType=%s>", keyKind, valKind)
     defer func() {
@@ -201,4 +168,94 @@ func test(t *testing.T, newConcurrentMap func() ConcurrentMapIntfs, genKey func(
         t.FailNow()
     }
     t.Logf("The %s value %v has been cleared.", mapType, cmap)
+}
+
+//测试string型cmap
+func TestStringCmap(t *testing.T) {
+    newCmap := func() ConcurrentMapIntfs {
+        keyType := reflect.TypeOf(string(2))
+        valType := keyType
+        return NewConcurrentMap(keyType, valType)
+    }
+    genFunc := func() interface{} { return genRandString() }
+    test(t, newCmap, genFunc, genFunc, reflect.String, reflect.String)
+}
+
+func genRandString() string {
+    var buff bytes.Buffer
+    var prev string
+    var curr string
+    for i := 0; buff.Len() < 3; i++ {
+        curr = string(genRandAZAscii())
+        if curr == prev {
+            continue
+        }
+        prev = curr
+        buff.WriteString(curr)
+    }
+    return buff.String()
+}
+
+func genRandAZAscii() int {
+    min := 65 // A
+    max := 90 // Z
+    rand.Seed(time.Now().UnixNano())
+    return min + rand.Intn(max-min)
+}
+
+/***************性能测试***************/
+func BenchmarkConcurrentMap(b *testing.B) {
+    keyType := reflect.TypeOf(int32(2))
+    valType := keyType
+    cmap := NewConcurrentMap(keyType, valType)
+    var key, val int32
+    fmt.Printf("N=%d.\n", b.N)
+    //StartTimer在benchmark函数开始的时候，是自动执行的，所以这里reset
+    b.ResetTimer()
+    for i := 0; i < b.N; i++ {
+        b.StopTimer()
+        seed := int32(i)
+        key = seed
+        val = seed << 10
+        b.StartTimer()
+        cmap.Put(key, val)
+        _ = cmap.Get(key)
+        b.StopTimer()
+        b.SetBytes(8)
+        b.StartTimer()
+    }
+    ml := cmap.Len()
+    b.StopTimer()
+    mapType := fmt.Sprintf("ConcurrentMap<%s, %s>",
+        keyType.Kind().String(), valType.Kind().String())
+    b.Logf("The length of %s value is %d.\n", mapType, ml)
+    b.StartTimer()
+}
+
+func BenchmarkMap(b *testing.B) {
+    keyType := reflect.TypeOf(int32(2))
+    valType := keyType
+    imap := make(map[interface{}]interface{})
+    var key, elem int32
+    fmt.Printf("N=%d.\n", b.N)
+    b.ResetTimer()
+    for i := 0; i < b.N; i++ {
+        b.StopTimer()
+        seed := int32(i)
+        key = seed
+        elem = seed << 10
+        b.StartTimer()
+        imap[key] = elem
+        b.StopTimer()
+        _ = imap[key]
+        b.StopTimer()
+        b.SetBytes(8)
+        b.StartTimer()
+    }
+    ml := len(imap)
+    b.StopTimer()
+    mapType := fmt.Sprintf("Map<%s, %s>",
+        keyType.Kind().String(), valType.Kind().String())
+    b.Logf("The length of %s value is %d.\n", mapType, ml)
+    b.StartTimer()
 }
