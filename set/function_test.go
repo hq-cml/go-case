@@ -132,7 +132,7 @@ func TestSetOperation(t *testing.T) {
 
 // ----- 随机测试对象生成函数 -----
 
-func genRandSet(newSet func() Set) (set Set, elemMap map[interface{}]bool) {
+func genRandSet(newSet func() SetIntfs) (set SetIntfs, elemMap map[interface{}]bool) {
     set = newSet()
     elemMap = make(map[interface{}]bool)
     var enough bool

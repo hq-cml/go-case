@@ -54,7 +54,7 @@ func (set *HashSet) Len() int{
 
 //判断HashSet是否相等（拥有相同的元素集合）
 //func (set *HashSet) Same(other *HashSet) bool {
-func (set *HashSet) Same(other Set) bool {
+func (set *HashSet) Same(other SetIntfs) bool {
     if other == nil {
         return false
     }
