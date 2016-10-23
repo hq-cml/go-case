@@ -1,4 +1,4 @@
-Golang 的一些简单常见case。列出备忘~
+Golang 的一些简单常见case。
 
 1.argument: 命令行参数获取
 2.files: 文件读写
@@ -14,7 +14,7 @@ Golang 的一些简单常见case。列出备忘~
 12.reflect：反射
 13.secure：安全相关，md5 & sha1
 14.base-control：基本控制，defer、error、for、panic、switch等等
-15.set：自己实现了一个go 语言版本的集合Set结构
-16.ordered_map: 一个支持排序的map实现
+15.set：利用golang内置的map实现一个set功能
+16.customized-map: 定制化map的实现：支持排序的map实现 + 并发安全的map实现
 17.IPC: 进程间通信：pipe，signal，socket
 

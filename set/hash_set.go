@@ -6,9 +6,7 @@ import (
 )
 
 /*
- * 利用内置的hash实现set功能，HashSet类型实现了Set接口！！
- * 用key存储set的值key用interface{}类型，表示set的值是任意类型
- * val用bool类型，因为1，省空间 2，用起来方便，可以表示是否存在等
+ * HashSet结构需要实现了Set接口
  */
 type HashSet struct{
     m map[interface{}]bool
