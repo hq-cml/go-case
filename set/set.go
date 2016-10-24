@@ -14,9 +14,6 @@ type SetIntfs interface {
     String() string
 }
 
-/*
- * Set接口类型的高级方法，作为公用函数，没必要每种实现各自实现
- */
 // 判断集合 self 是否是集合 other 的超集
 func IsSuperset(self SetIntfs, other SetIntfs) bool {
     if self == nil || other == nil {
@@ -116,7 +113,7 @@ func SymmetricDifference(self SetIntfs, other SetIntfs) SetIntfs {
     return Union(diffA, diffB)
 }
 
-//TODO 这个地方应该做成可以生成多种Set版本的功能
+//TODO 这个地可以做成可以生成多种Set版本的功能
 func NewSimpleSet() SetIntfs {
     return NewHashSet()
 }

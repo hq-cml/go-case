@@ -131,7 +131,6 @@ func TestSetOperation(t *testing.T) {
 }
 
 // ----- 随机测试对象生成函数 -----
-
 func genRandSet(newSet func() SetIntfs) (set SetIntfs, elemMap map[interface{}]bool) {
     set = newSet()
     elemMap = make(map[interface{}]bool)

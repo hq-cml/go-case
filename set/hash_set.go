@@ -6,7 +6,7 @@ import (
 )
 
 /*
- * HashSet结构需要实现了Set接口
+ * *HashSet结构需要实现了SetIntfs接口
  */
 type HashSet struct{
     m map[interface{}]bool
@@ -17,7 +17,8 @@ func NewHashSet() *HashSet{
     return &HashSet{m: make(map[interface{}]bool)}
 }
 
-//添加元素
+/* HashSet结构需要实现了Set接口 */
+//添加元素，如果元素已经存在，返回false
 func (set *HashSet) Add(e interface{}) bool{
     if _, ok := set.m[e]; !ok{
         set.m[e] = true
@@ -33,7 +34,7 @@ func (set *HashSet) Remove(e interface{}) {
 
 //清空set，有两个点说明~
 //1. 直接重新赋值set.m，旧的m交由垃圾回收器去回收
-//2. 注意接收者是*hashSet，否则无法达到
+//2. 注意接收者是*hashSet，否则无法达到清空目的
 func (set *HashSet) Clear() {
     set.m = make(map[interface{}]bool)
 }
@@ -53,7 +54,6 @@ func (set *HashSet) Len() int{
 }
 
 //判断HashSet是否相等（拥有相同的元素集合）
-//func (set *HashSet) Same(other *HashSet) bool {
 func (set *HashSet) Same(other SetIntfs) bool {
     if other == nil {
         return false
@@ -94,8 +94,8 @@ func (set *HashSet) Elements() []interface{}{
     return snapshot
 }
 
-//管用方法签名String，fmt包的方法打印一个对象时候，如果有String方法，则会优先
-//以此为参考。可以尝试这个函数改名，则fmt打印的结果就会是原生的，否则就是定制的
+//惯用方法签名String，fmt包的方法打印一个对象时候，如果有String方法，则会优先
+//以此为参考。可以尝试这个函数改名，则fmt打印的结果就会是原生的
 func (set *HashSet) String() string {
     var buf bytes.Buffer
     buf.WriteString("set{")
