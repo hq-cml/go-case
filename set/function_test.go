@@ -13,7 +13,7 @@ import (
 )
 
 /**************************** HashSet相关功能 **************************/
-//必须大写Test开头
+//必须大写Test开头，测试创建
 func TestHashSetCreation(t *testing.T) {
     defer func() {
         if err := recover(); err != nil {
@@ -27,7 +27,7 @@ func TestHashSetCreation(t *testing.T) {
     if hs == nil {
         t.Errorf("The result of func NewHashSet is nil!\n")
     }
-    isSet := IsSet(hs)
+    isSet := IsSet(hs)//判断是否实现了Set接口
     if !isSet {
         t.Errorf("The value of HashSet is not Set!\n")
     } else {
@@ -35,6 +35,7 @@ func TestHashSetCreation(t *testing.T) {
     }
 }
 
+//测试Set的操作
 func TestSetOperation(t *testing.T) {
     defer func() {
         if err := recover(); err != nil {
@@ -42,7 +43,7 @@ func TestSetOperation(t *testing.T) {
             t.Errorf("Fatal Error: %s\n", err)
         }
     }()
-    fmt.Println(222)
+
     t.Logf("Starting TestHashSetOp...")
     hs := NewHashSet()
     if hs.Len() != 0 {
