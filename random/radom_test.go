@@ -24,7 +24,7 @@ func TestGenRandIntMinMax(t *testing.T) {
     t.Log(i)
     i = GenRandIntMinMax(0, 100)
     t.Log(i)
-    i = GenRandIntMinMax(0, 100)
+    i = GenRandIntMinMax(0, 1)
     t.Log(i)
     i = GenRandIntMinMax(99, 100)
     t.Log(i)
@@ -48,21 +48,21 @@ func TestGenRandAscII(t *testing.T) {
     t.Logf("%c", c)
 }
 
-//func TestGenRandString(t *testing.T) {
-//    var s string
-//    s = GenRandString()
-//    t.Logf("%s", s)
-//    s = GenRandString()
-//    t.Logf("%s", s)
-//    s = GenRandString()
-//    t.Logf("%s", s)
-//    s = GenRandString()
-//    t.Logf("%s", s)
-//    s = GenRandString()
-//    t.Logf("%s", s)
-//    s = GenRandString()
-//    t.Logf("%s", s)
-//    s = GenRandString()
-//    t.Logf("%s", s)
-//
-//}
+func TestGenRandString(t *testing.T) {
+    var s string
+    s = GenRandString(1)
+    t.Logf("%s", s)
+    s = GenRandString(3)
+    t.Logf("%s", s)
+    s = GenRandString(5)
+    t.Logf("%s", s)
+    s = GenRandString(10)
+    t.Logf("%s", s)
+    s = GenRandStringMaxLen(10)
+    t.Logf("%s", s)
+    s = GenRandStringMaxLen(10)
+    t.Logf("%s", s)
+    s = GenRandStringMaxLen(10)
+    t.Logf("%s", s)
+
+}

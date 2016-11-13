@@ -4,7 +4,7 @@ import (
     "math/rand"
     "time"
     "fmt"
-    //"bytes"
+    "bytes"
 )
 
 //！！种子很重要！！
@@ -46,4 +46,27 @@ func GenRandAscII() byte {
     }
 
     return byte(c)
+}
+
+//生成长度一定的随机字符串
+func GenRandString(len int64) string {
+    var buff bytes.Buffer
+    var curr string
+    for i := 0; int64(i) < len; i++ {
+        curr = string(GenRandAscII())
+        buff.WriteString(curr)
+    }
+    return buff.String()
+}
+
+//生成随机字符串
+func GenRandStringMaxLen(max_len int64) string {
+    var buff bytes.Buffer
+    len := GenRandIntMinMax(1, max_len)
+    var curr string
+    for i := 0; int64(i) < len; i++ {
+        curr = string(GenRandAscII())
+        buff.WriteString(curr)
+    }
+    return buff.String()
 }
