@@ -17,4 +17,4 @@ Golang 的一些简单常见case。
 15.set：利用golang内置的map实现一个set功能
 16.customized-map: 定制化map的实现：支持排序的map实现 + 并发安全的map实现
 17.IPC: 进程间通信：pipe，signal，socket
-
+18.rand：各类随机的生成：整型，字符串...
