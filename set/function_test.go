@@ -5,11 +5,11 @@ package set
 import (
     "testing"
     "runtime/debug"
-    "fmt"
+    //"fmt"
+    //"strings"
+    myrandom "github.com/hq-cml/go-case/random"
     "strings"
-    "bytes"
-    "time"
-    "math/rand"
+    "fmt"
 )
 
 /**************************** HashSet相关功能 **************************/
@@ -50,16 +50,10 @@ func TestSetOperation(t *testing.T) {
         t.Errorf("ERROR: The length of original HashSet value is not 0!\n")
         t.FailNow()
     }
-    randElem := genRandElement()
+    var randElem interface{}
     expectedElemMap := make(map[interface{}]bool)
-    t.Logf("Add %v to the HashSet value %v.\n", randElem, hs)
-    hs.Add(randElem)
-    expectedElemMap[randElem] = true
-    expectedLen := len(expectedElemMap)
-    if hs.Len() != expectedLen {
-        t.Errorf("ERROR: The length of HashSet value %d is not %d!\n", hs.Len(), expectedLen)
-        t.FailNow()
-    }
+
+    //添加8个元素
     var result bool
     for i := 0; i < 8; i++ {
         randElem = genRandElement()
@@ -77,17 +71,21 @@ func TestSetOperation(t *testing.T) {
         }
         expectedElemMap[randElem] = true
     }
-    expectedLen = len(expectedElemMap)
+    expectedLen := len(expectedElemMap)
     if hs.Len() != expectedLen {
         t.Errorf("ERROR: The length of HashSet value %d is not %d!\n", hs.Len(), expectedLen)
         t.FailNow()
     }
+
+    //挨个检查添加的元素是否存在
     for k, _ := range expectedElemMap {
         if !hs.Contains(k) {
             t.Errorf("ERROR: The HashSet value %v do not contains %v!", hs, k)
             t.FailNow()
         }
     }
+
+    //测试删除
     number := 2
     for k, _ := range expectedElemMap {
         if number%2 == 0 {
@@ -102,17 +100,15 @@ func TestSetOperation(t *testing.T) {
         }
         number++
     }
+
     expectedLen = len(expectedElemMap)
     if hs.Len() != expectedLen {
         t.Errorf("ERROR: The length of HashSet value %d is not %d!\n", hs.Len(), expectedLen)
         t.FailNow()
     }
-    for _, v := range hs.Elements() {
-        if !expectedElemMap[v] {
-            t.Errorf("ERROR: The HashSet value %v contains %v!", hs, v)
-            t.FailNow()
-        }
-    }
+    t.Logf("After remove. HashSet value %v.\n", hs)
+
+    //测试是否相同
     hs2 := NewHashSet()
     for k, _ := range expectedElemMap {
         hs2.Add(k)
@@ -121,6 +117,8 @@ func TestSetOperation(t *testing.T) {
         t.Errorf("ERROR: HashSet value %v do not same %v!\n", hs, hs2)
         t.FailNow()
     }
+
+    //测试字符串化
     str := hs.String()
     t.Logf("The string of HashSet value %v is '%s'.\n", hs, str)
     for _, v := range hs.Elements() {
@@ -148,54 +146,28 @@ func genRandSet(newSet func() SetIntfs) (set SetIntfs, elemMap map[interface{}]b
 }
 
 func genRandElement() interface{} {
-    seed := rand.Int63n(10000)
-    switch seed {
+    i := myrandom.GenRandIntMinMax(0, 4)
+    switch i {
     case 0:
-        return genRandInt()
+        return myrandom.GenRandInt(10000)
     case 1:
-        return genRandString()
+        return myrandom.GenRandStringMaxLen(15)
     case 2:
         return struct {
             num int64
             str string
-        }{genRandInt(), genRandString()}
+        }{myrandom.GenRandInt(10000), myrandom.GenRandStringMaxLen(15)}
     default:
         const length = 2
         arr := new([length]interface{})
         for i := 0; i < length; i++ {
             if i%2 == 0 {
-                arr[i] = genRandInt()
+                arr[i] = myrandom.GenRandInt(10000)
             } else {
-                arr[i] = genRandString()
+                arr[i] = myrandom.GenRandStringMaxLen(15)
             }
         }
         return *arr
     }
 }
 
-func genRandString() string {
-    var buff bytes.Buffer
-    var prev string
-    var curr string
-    for i := 0; buff.Len() < 3; i++ {
-        curr = string(genRandAZAscii())
-        if curr == prev {
-            continue
-        } else {
-            prev = curr
-        }
-        buff.WriteString(curr)
-    }
-    return buff.String()
-}
-
-func genRandAZAscii() int {
-    min := 65 // A
-    max := 90 // Z
-    rand.Seed(time.Now().UnixNano())
-    return min + rand.Intn(max-min)
-}
-
-func genRandInt() int64 {
-    return rand.Int63n(10000)
-}
