@@ -1,2 +1,12 @@
+定制化的map，扩展原生map的一些功能：
 
+basic.go: 泛化的定制Map的接口
+
+1. ordered_map 可排序的map
+    如果要支持排序，需要实现接口sort.Interface。因为map类型元素是无序的，所以需要一个元素有序的类型做辅助。
+   keys.go: key的接口，存储ordered_map的key。接口嵌套的方式，实现sort.Interface。对ordered_map的操作，比如len、swap、Less其实都是通过对这个辅助变量keys进行。
+            keys元素的迭代顺序，就代表了ordered_map的迭代顺序。
+
+
+2. concurrent_map 线程安全的map
 
