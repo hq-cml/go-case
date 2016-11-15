@@ -100,7 +100,6 @@ func TestInt64Keys(t *testing.T) {
     //调用测试模板
     tmplTestKeys(t,                                                           //参数1
         func() KeysIntfs {                                                    //参数2
-
             return NewKeys(
             func(e1 interface{}, e2 interface{}) int8 {
             	k1 := e1.(int64)
@@ -117,4 +116,27 @@ func TestInt64Keys(t *testing.T) {
         },
         func() interface{} { return random.GenRandInt(1000) },               //参数3
         reflect.Int64)                                                       //参数4
+}
+
+//String测试
+func TestStringKeys(t *testing.T) {
+    //调用测试模板
+    tmplTestKeys(t,
+        func() KeysIntfs {
+            return NewKeys(
+                func(e1 interface{}, e2 interface{}) int8 {
+                    k1 := e1.(string)
+                    k2 := e2.(string)
+                    if k1 < k2 {
+                        return -1
+                    } else if k1 > k2 {
+                        return 1
+                    } else {
+                        return 0
+                    }
+                },
+                reflect.TypeOf(string(1)))
+        },
+        func() interface{} { return random.GenRandString(10) },
+        reflect.String)
 }

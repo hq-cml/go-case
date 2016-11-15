@@ -9,6 +9,7 @@ basic.go: 泛化的定制Map的接口
 
 测试：
 go test -run=TestInt64Keys github.com/hq-cml/go-case/customized-map/ordered_map -v #测试创建
+go test -run=TestStringKeys github.com/hq-cml/go-case/customized-map/ordered_map -v #测试创建
 
 
 2. concurrent_map 线程安全的map
