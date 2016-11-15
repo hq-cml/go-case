@@ -58,11 +58,23 @@ func (omap *orderedMap) Remove(key interface{}) interface{} {
     }
     return oldElem
 }
+//清除所有的键值对
+func (omap *orderedMap) Clear() {
+    omap.m = make(map[interface{}]interface{})
+    omap.keys.Clear()
+}
+//获取键值对的数量
+func (omap *orderedMap) Len() int {
+    return len(omap.m)
+}
+//判断是否包含给定的键值
+func (omap *orderedMap) Contains(key interface{}) bool {
+    _, ok := omap.m[key]
+    return ok
+}
 
 
-Clear()                                                    // 清除所有的键值对。
-Len() int                                                  // 获取键值对的数量。
-Contains(key interface{}) bool                             // 判断是否包含给定的键值。
+
 Keys() []interface{}                                       // 获取所有key所组成的切片值。
 Vals() []interface{}                                       // 获取所有val所组成的切片值。
 ToMap() map[interface{}]interface{}                        // 获取已包含的键值对所组成的字典值。
