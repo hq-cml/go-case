@@ -5,6 +5,7 @@ import (
     "testing"
     "reflect"
     "runtime/debug"
+    "github.com/hq-cml/go-case/random"
 )
 
 //测试Keys的模板函数
@@ -65,6 +66,8 @@ func tmplTestKeys(t *testing.T, newKeys func() KeysIntfs, genKey func() interfac
         t.FailNow()
     }
     t.Logf("The Keys(%s) value %v is sorted.", elemKind, keys)
+
+    //测试Kind和Type是否一致
     actualElemType := keys.ElemType()
     if actualElemType == nil {
         t.Errorf("ERROR: The element type of Keys(%s) value is nil!\n", elemKind)
@@ -90,4 +93,28 @@ func tmplTestKeys(t *testing.T, newKeys func() KeysIntfs, genKey func() interfac
         t.FailNow()
     }
     t.Logf("The Keys(%s) value %v have been cleared.", elemKind, keys)
+}
+
+//Int64测试
+func TestInt64Keys(t *testing.T) {
+    //调用测试模板
+    tmplTestKeys(t,                                                           //参数1
+        func() KeysIntfs {                                                    //参数2
+
+            return NewKeys(
+            func(e1 interface{}, e2 interface{}) int8 {
+            	k1 := e1.(int64)
+            	k2 := e2.(int64)
+            	if k1 < k2 {
+            		return -1
+            	} else if k1 > k2 {
+            		return 1
+            	} else {
+            		return 0
+            	}
+            },
+            reflect.TypeOf(int64(1)))
+        },
+        func() interface{} { return random.GenRandInt(1000) },               //参数3
+        reflect.Int64)                                                       //参数4
 }
