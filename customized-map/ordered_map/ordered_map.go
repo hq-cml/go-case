@@ -72,11 +72,42 @@ func (omap *orderedMap) Contains(key interface{}) bool {
     _, ok := omap.m[key]
     return ok
 }
-
-
-
-Keys() []interface{}                                       // 获取所有key所组成的切片值。
-Vals() []interface{}                                       // 获取所有val所组成的切片值。
-ToMap() map[interface{}]interface{}                        // 获取已包含的键值对所组成的字典值。
-KeyType() reflect.Type                                     // 获取键的类型。
-ValType() reflect.Type                                     // 获取元素的类型。
+//获取所有key所组成的切片值
+func (omap *orderedMap) Keys() []interface{} {
+    return omap.keys.GetAll()
+}
+//获取所有val所组成的切片值。
+func (omap *orderedMap) Vals() []interface{} {
+    initialLen := omap.Len()
+    vals := make([]interface{}, initialLen)
+    actualLen := 0
+    for _, key := range omap.keys.GetAll() {
+        val := omap.m[key]
+        if actualLen < initialLen {
+            vals[actualLen] = val
+        } else {
+            vals = append(vals, val)
+        }
+        actualLen++
+    }
+    if actualLen < initialLen {
+        vals = vals[:actualLen]
+    }
+    return vals
+}
+//获取已包含的键值对所组成的字典值。类似于得到一个快照
+func (omap *orderedMap) ToMap() map[interface{}]interface{} {
+    replica := make(map[interface{}]interface{})
+    for k, v := range omap.m {
+        replica[k] = v
+    }
+    return replica
+}
+//获取键的类型
+func (omap *orderedMap) KeyType() reflect.Type {
+    return omap.keys.ElemType()
+}
+//获取元素的类型
+func (omap *orderedMap) ElemType() reflect.Type {
+    return omap.elemType
+}
