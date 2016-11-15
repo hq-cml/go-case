@@ -1,4 +1,4 @@
-package customized_map
+package ordered_map
 
 import(
     "fmt"
@@ -48,7 +48,18 @@ func (keys *myKeys) Swap(i, j int){
     keys.container[i], keys.container[j] = keys.container[j], keys.container[i]
 }
 
-//其次，实现接口Keys的其他方法
+//接着，实现接口Keys的其他方法
+//判断k是否是可以存入myKeys.container的合法值
+func (keys *myKeys) isAcceptableElem(k interface{}) bool {
+    if k == nil {
+        return false
+    }
+    //获取k的实际类型，与elemType进行比较
+    if reflect.TypeOf(k) != keys.elemType {
+        return false
+    }
+    return true
+}
 //Add方法
 func (keys *myKeys) Add(k interface{}) bool {
     ok := keys.isAcceptableElem(k)
@@ -56,7 +67,7 @@ func (keys *myKeys) Add(k interface{}) bool {
         return false
     }
     keys.container = append(keys.container, k)
-    sort.Sort(keys)
+    sort.Sort(keys) //新元素加入进来之后，应该立刻进行一次排序！（因为*myKeys实现了sort.Interface接口，所以可以作为sort.Sort参数）
     return true
 }
 //Search方法，返回值已命名；利用了sort.Search方法
@@ -65,7 +76,7 @@ func (keys *myKeys) Search(k interface{}) (index int, contains bool) {
     if !ok {
         return
     }
-    //sort.Serach的第二个参数是匿名函数一枚，功能是判断i对应的元素，是否>=要寻找的k值
+    //sort.Serach的第二个参数是匿名函数，功能是判断i对应的元素，是否>=要寻找的k值
     //仔细看sort.Search的源码发现，返回值index其实是k对应的索引id(存在)，或者是大于k的最小的索引id(不存在)
     index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k) >= 0 })
 
@@ -142,20 +153,9 @@ func (keys *myKeys) String() string {
     buf.WriteString("}")
     return buf.String()
 }
-//判断k是否是可以存入myKeys.container的合法值
-func (keys *myKeys) isAcceptableElem(k interface{}) bool {
-    if k == nil {
-        return false
-    }
-    //获取k的实际类型，与elemType进行比较
-    if reflect.TypeOf(k) != keys.elemType {
-        return false
-    }
-
-    return true
-}
 
 //golang惯例，“构造”函数
+//返回值是KeysIntfs实现，所以是myKeys的指针
 func NewKeys(compareFunc CompareFunction, elemType reflect.Type) KeysIntfs {
     return &myKeys{
         container:    make([]interface{}, 0),
