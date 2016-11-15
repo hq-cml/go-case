@@ -109,5 +109,55 @@ func (omap *orderedMap) KeyType() reflect.Type {
 }
 //获取元素的类型
 func (omap *orderedMap) ElemType() reflect.Type {
-    return omap.elemType
+    return omap.valType
+}
+////////////////实现扩展的方法
+//获取第一个键值。若无任何键值对则返回nil。
+func (omap *orderedMap) FirstKey() interface{} {
+    if omap.Len() == 0 {
+        return nil
+    }
+    return omap.keys.Get(0)
+}
+//获取最后一个键值。若无任何键值对则返回nil。
+func (omap *orderedMap) LastKey() interface{} {
+    length := omap.Len()
+    if length == 0 {
+        return nil
+    }
+    return omap.keys.Get(length - 1)
+}
+//获取由小于键值toKey且大于等于键值fromKey的键值所对应的键值对组成的OrderedMap类型值。其实本质上就是将map切出一部分来
+func (omap *orderedMap) SubMap(fromKey interface{}, toKey interface{}) OrderedMapIntfs {
+    newOmap := &orderedMap{
+        keys:     NewKeys(omap.keys.CompareFunc(), omap.keys.ElemType()),
+        valType:  omap.valType,
+        m:        make(map[interface{}]interface{})}
+    omapLen := omap.Len()
+    if omapLen == 0 {
+        return newOmap
+    }
+    beginIndex, contains := omap.keys.Search(fromKey)
+    if !contains {
+        beginIndex = 0
+    }
+    endIndex, contains := omap.keys.Search(toKey)
+    if !contains {
+        endIndex = omapLen
+    }
+    var key, elem interface{}
+    for i := beginIndex; i < endIndex; i++ {
+        key = omap.keys.Get(i)
+        elem = omap.m[key]
+        newOmap.Put(key, elem)
+    }
+    return newOmap
+}
+//获取由小于键值toKey的键值所对应的键值对组成的OrderedMap类型值。其实就是取出map的某个点的前半部分
+func (omap *orderedMap) HeadMap(toKey interface{}) OrderedMapIntfs {
+    return omap.SubMap(nil, toKey)
+}
+//获取由大于等于键值fromKey的键值所对应的键值对组成的OrderedMap类型值。其实就是取出map的某个点的后半部分
+func (omap *orderedMap) TailMap(fromKey interface{}) OrderedMapIntfs {
+    return omap.SubMap(fromKey, nil)
 }
