@@ -3,6 +3,8 @@ package ordered_map
 import (
     cmap "github.com/hq-cml/go-case/customized-map"
     "reflect"
+    "bytes"
+    "fmt"
 )
 
 //有序的Map的接口类型。
@@ -160,4 +162,35 @@ func (omap *orderedMap) HeadMap(toKey interface{}) OrderedMapIntfs {
 //获取由大于等于键值fromKey的键值所对应的键值对组成的OrderedMap类型值。其实就是取出map的某个点的后半部分
 func (omap *orderedMap) TailMap(fromKey interface{}) OrderedMapIntfs {
     return omap.SubMap(fromKey, nil)
+}
+//String
+func (omap *orderedMap) String() string {
+    var buf bytes.Buffer
+    buf.WriteString("OrderedMap<")
+    buf.WriteString(omap.keys.ElemType().Kind().String())
+    buf.WriteString(",")
+    buf.WriteString(omap.valType.Kind().String())
+    buf.WriteString(">{")
+    first := true
+    omapLen := omap.Len()
+    for i := 0; i < omapLen; i++ {
+        if first {
+            first = false
+        } else {
+            buf.WriteString(" ")
+        }
+        key := omap.keys.Get(i)
+        buf.WriteString(fmt.Sprintf("%v", key))
+        buf.WriteString(":")
+        buf.WriteString(fmt.Sprintf("%v", omap.m[key]))
+    }
+    buf.WriteString("}")
+    return buf.String()
+}
+//惯例
+func NewOrderedMap(keys KeysIntfs, valType reflect.Type) OrderedMapIntfs {
+    return &orderedMap{
+        keys:     keys,
+        valType: valType,
+        m:        make(map[interface{}]interface{})}
 }
