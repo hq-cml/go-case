@@ -4,6 +4,7 @@ import (
     "testing"
     "reflect"
     "runtime/debug"
+    "github.com/hq-cml/go-case/random"
 )
 
 func tmplTestOrderedMap(t *testing.T, newOrderedMap func() OrderedMapIntfs, genKey func() interface{}, genElem func() interface{}, valKind reflect.Kind) {
@@ -73,7 +74,7 @@ func tmplTestOrderedMap(t *testing.T, newOrderedMap func() OrderedMapIntfs, genK
     delete(testMap, invalidKey)
 
     // Type
-    actualElemType := omap.valType()
+    actualElemType := omap.ValType()
     if actualElemType == nil {
         t.Errorf("ERROR: The element type of OrderedMap(elemType=%s) value is nil!\n", valKind)
         t.FailNow()
@@ -192,3 +193,69 @@ func tmplTestOrderedMap(t *testing.T, newOrderedMap func() OrderedMapIntfs, genK
     t.Logf("The OrderedMap(elemType=%s) value %v has been cleared.", valKind, omap)
 }
 
+//
+func TestInt64OrderedKeyMap(t *testing.T) {
+    keys := NewKeys(
+        func(e1 interface{}, e2 interface{}) int8 {
+            k1 := e1.(int64)
+            k2 := e2.(int64)
+            if k1 < k2 {
+                return -1
+            } else if k1 > k2 {
+                return 1
+            } else {
+                return 0
+            }
+        },
+        reflect.TypeOf(int64(1)))
+
+    //按key排序的map
+    newOmap := func() OrderedMapIntfs {
+        return NewOrderedMap(keys, reflect.TypeOf(int64(1)))
+    }
+
+    tmplTestOrderedMap(
+        t,
+        newOmap,
+        func() interface{} { return random.GenRandInt(1000) },
+        func() interface{} { return random.GenRandInt(1000) },
+        reflect.Int64)
+}
+
+
+//返回值是KeysIntfs实现，所以是myKeys的指针
+func NewValKeys(compareFunc CompareFunction, elemType reflect.Type, omap OrderedMapIntfs) KeysIntfs {
+    return &myKeys{
+        container:    make([]interface{}, 0),
+        compareFunc:  compareFunc,
+        elemType:     elemType,
+    }
+}
+
+func TestInt64OrderedMap(t *testing.T) {
+    keys := NewKeys(
+        func(e1 interface{}, e2 interface{}) int8 {
+            k1 := e1.(int64)
+            k2 := e2.(int64)
+            if k1 < k2 {
+                return -1
+            } else if k1 > k2 {
+                return 1
+            } else {
+                return 0
+            }
+        },
+        reflect.TypeOf(int64(1)))
+
+    //按val排序的map
+    newOmap := func() OrderedMapIntfs {
+        return NewOrderedMap(keys, reflect.TypeOf(int64(1)))
+    }
+
+    tmplTestOrderedMap(
+        t,
+        newOmap,
+        func() interface{} { return random.GenRandInt(1000) },
+        func() interface{} { return random.GenRandInt(1000) },
+        reflect.Int64)
+}

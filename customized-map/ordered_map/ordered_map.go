@@ -110,7 +110,7 @@ func (omap *orderedMap) KeyType() reflect.Type {
     return omap.keys.ElemType()
 }
 //获取元素的类型
-func (omap *orderedMap) ElemType() reflect.Type {
+func (omap *orderedMap) ValType() reflect.Type {
     return omap.valType
 }
 ////////////////实现扩展的方法
