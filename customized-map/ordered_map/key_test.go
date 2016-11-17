@@ -95,27 +95,45 @@ func tmplTestKeys(t *testing.T, newKeys func() KeysIntfs, genKey func() interfac
     t.Logf("The Keys(%s) value %v have been cleared.", elemKind, keys)
 }
 
+
+//func NewKeys(compareFunc CompareFunction, elemType reflect.Type) KeysIntfs
+//func tmplTestKeys(t *testing.T, newKeys func() KeysIntfs, genKey func() interface{}, elemKind reflect.Kind)
+
+//int64的key比较函数
+func compareInt64Key(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8{
+    k1 := e1.(int64)
+    k2 := e2.(int64)
+    if k1 < k2 {
+        return -1
+    } else if k1 > k2 {
+        return 1
+    } else {
+        return 0
+    }
+}
+
 //Int64测试
 func TestInt64Keys(t *testing.T) {
     //调用测试模板
     tmplTestKeys(t,                                                           //参数1
         func() KeysIntfs {                                                    //参数2
-            return NewKeys(
-            func(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8 {
-            	k1 := e1.(int64)
-            	k2 := e2.(int64)
-            	if k1 < k2 {
-            		return -1
-            	} else if k1 > k2 {
-            		return 1
-            	} else {
-            		return 0
-            	}
-            },
-            reflect.TypeOf(int64(1)))
+            return NewKeys(compareInt64Key, reflect.TypeOf(int64(1)))
         },
         func() interface{} { return random.GenRandInt(1000) },               //参数3
         reflect.Int64)                                                       //参数4
+}
+
+//string的key比较函数
+func compareStringKey(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8{
+    k1 := e1.(string)
+    k2 := e2.(string)
+    if k1 < k2 {
+        return -1
+    } else if k1 > k2 {
+        return 1
+    } else {
+        return 0
+    }
 }
 
 //String测试
@@ -123,19 +141,7 @@ func TestStringKeys(t *testing.T) {
     //调用测试模板
     tmplTestKeys(t,
         func() KeysIntfs {
-            return NewKeys(
-                func(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8 {
-                    k1 := e1.(string)
-                    k2 := e2.(string)
-                    if k1 < k2 {
-                        return -1
-                    } else if k1 > k2 {
-                        return 1
-                    } else {
-                        return 0
-                    }
-                },
-                reflect.TypeOf(string(1)))
+            return NewKeys(compareStringKey, reflect.TypeOf(string(1)))
         },
         func() interface{} { return random.GenRandString(10) },
         reflect.String)

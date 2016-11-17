@@ -12,7 +12,7 @@ import(
 //小于0: 第一个参数小于第二个参数
 //等于0: 第一个参数等于第二个参数
 //大于0: 第一个参数大于第二个参数
-//如果第三个参数非nil，则比较的是map的值，否则比较的是key本身
+//第1和2个参数是key，第三个参数是map本身.用户自定制compare功能，选择比较key本身或者是比较的是map的值
 type CompareFunction func(interface{}, interface{}, map[interface{}]interface{}) int8
 
 /*
