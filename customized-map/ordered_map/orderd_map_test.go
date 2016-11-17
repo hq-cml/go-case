@@ -218,31 +218,46 @@ func TestInt64OrderedKeyMap(t *testing.T) {
 //    }
 //}
 //
-////int64的val比较函数
-//func compareInt64Val(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8{
-//    k1 := e1.(int64)
-//    k2 := e2.(int64)
-//    if k1 < k2 {
-//        return -1
-//    } else if k1 > k2 {
-//        return 1
-//    } else {
-//        return 0
-//    }
-//}
-//
-//func TestInt64OrderedMap(t *testing.T) {
-//    keys := NewKeys(compareInt64Val, reflect.TypeOf(int64(1)))
-//
-//    //按val排序的map
-//    newOmap := func() OrderedMapIntfs {
-//        return NewOrderedMap(keys, reflect.TypeOf(int64(1)))
-//    }
-//
-//    tmplTestOrderedMap(
-//        t,
-//        newOmap,
-//        func() interface{} { return random.GenRandInt(1000) },
-//        func() interface{} { return random.GenRandInt(1000) },
-//        reflect.Int64)
-//}
+
+//int64的val比较函数，比较map的val
+func compareInt64Val(k1 interface{}, k2 interface{}, m map[interface{}]interface{}) int8{
+    var v1 int64
+    var v2 int64
+    if v, ok := m[k1]; ok{
+        v1 = v.(int64)
+    } else {
+        return -1
+    }
+    if v, ok := m[k2]; ok{
+        v2 = v.(int64)
+    } else {
+        return -1
+    }
+
+    if v1 < v2 {
+        return -1
+    } else if v1 > v2 {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+//测试按val排序的map
+func TestInt64OrderedMap(t *testing.T) {
+    keys := NewKeys(compareInt64Val, reflect.TypeOf(int64(1)))
+
+    //按val排序的map
+    omap := NewOrderedMap(keys, reflect.TypeOf(int64(1)))
+
+    //
+    okeys := keys.(*orderedKeys)
+    okeys.omap = omap.(*orderedMap)
+
+    tmplTestOrderedMap(
+        t,
+        omap,
+        func() interface{} { return random.GenRandInt(1000) },
+        func() interface{} { return random.GenRandInt(1000) },
+        reflect.Int64)
+}
