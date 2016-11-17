@@ -101,7 +101,7 @@ func TestInt64Keys(t *testing.T) {
     tmplTestKeys(t,                                                           //参数1
         func() KeysIntfs {                                                    //参数2
             return NewKeys(
-            func(e1 interface{}, e2 interface{}) int8 {
+            func(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8 {
             	k1 := e1.(int64)
             	k2 := e2.(int64)
             	if k1 < k2 {
@@ -124,7 +124,7 @@ func TestStringKeys(t *testing.T) {
     tmplTestKeys(t,
         func() KeysIntfs {
             return NewKeys(
-                func(e1 interface{}, e2 interface{}) int8 {
+                func(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8 {
                     k1 := e1.(string)
                     k2 := e2.(string)
                     if k1 < k2 {

@@ -12,7 +12,8 @@ import(
 //小于0: 第一个参数小于第二个参数
 //等于0: 第一个参数等于第二个参数
 //大于0: 第一个参数大于第二个参数
-type CompareFunction func(interface{}, interface{}) int8
+//如果第三个参数非nil，则比较的是map的值，否则比较的是key本身
+type CompareFunction func(interface{}, interface{}, map[interface{}]interface{}) int8
 
 /*
  * 定义接口，作为ordered-map的keys成员的变量
@@ -34,6 +35,7 @@ type myKeys struct {
     container    []interface{}    //keys的实际容器，keys元素可以是任意类型
     compareFunc  CompareFunction  //函数也是一种类型，compareFunc负责比较元素的大小，具体实现交给上层开发者
     elemType     reflect.Type     //存储keys元素的实际类型，（运行时确定）
+    omap         *orderedMap      //myKeys所归属的ordered_map
 }
 
 //让类型*myKeys实现KeysIntfs接口:
@@ -42,7 +44,11 @@ func (keys *myKeys) Len() int{
     return len(keys.container)
 }
 func (keys *myKeys) Less(i, j int) bool{
-    return keys.compareFunc(keys.container[i], keys.container[j]) < 0
+    if keys.omap == nil {
+        return keys.compareFunc(keys.container[i], keys.container[j], nil) < 0
+    }else{
+        return keys.compareFunc(keys.container[i], keys.container[j], keys.omap.m) < 0
+    }
 }
 func (keys *myKeys) Swap(i, j int){
     keys.container[i], keys.container[j] = keys.container[j], keys.container[i]
@@ -78,7 +84,11 @@ func (keys *myKeys) Search(k interface{}) (index int, contains bool) {
     }
     //sort.Serach的第二个参数是匿名函数，功能是判断i对应的元素，是否>=要寻找的k值
     //仔细看sort.Search的源码发现，返回值index其实是k对应的索引id(存在)，或者是大于k的最小的索引id(不存在)
-    index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k) >= 0 })
+    if keys.omap == nil {
+        index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, nil) >= 0 })
+    } else {
+        index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, keys.omap.m) >= 0 })
+    }
 
     //由于index并非一定是找到了的索引id，所以要在此确认一下
     if index < keys.Len() && keys.container[index] == k {
@@ -161,5 +171,6 @@ func NewKeys(compareFunc CompareFunction, elemType reflect.Type) KeysIntfs {
         container:    make([]interface{}, 0),
         compareFunc:  compareFunc,
         elemType:     elemType,
+        omap:         nil,
     }
 }
