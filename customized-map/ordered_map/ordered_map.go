@@ -34,7 +34,7 @@ func (omap *orderedMap) isAcceptableVal(v interface{}) bool {
     return true
 }
 
-/********orderdMap类型实现OrderedMapIntfs**********/
+/******* //*orderdMap类型实现OrderedMapIntfs**********/
 //获取给定键值对应的元素值。若没有对应元素值则返回nil。
 func (omap *orderedMap) Get(key interface{}) interface{} {
     return omap.m[key]

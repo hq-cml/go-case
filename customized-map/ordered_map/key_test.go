@@ -9,7 +9,7 @@ import (
 )
 
 //测试Keys的模板函数
-func tmplTestKeys(t *testing.T, newKeys func() KeysIntfs, genKey func() interface{}, elemKind reflect.Kind) {
+func tmplTestKeys(t *testing.T, keys KeysIntfs, genKey func() interface{}, elemKind reflect.Kind) {
     defer func() {
         if err := recover(); err != nil {
             debug.PrintStack()
@@ -17,7 +17,7 @@ func tmplTestKeys(t *testing.T, newKeys func() KeysIntfs, genKey func() interfac
         }
     }()
     t.Logf("Starting TestKeys<%s>...", elemKind)
-    keys := newKeys()
+    //keys := newKeys()
 
     //生成5个随机key
     expectedLen := 5
@@ -114,11 +114,10 @@ func compareInt64Key(e1 interface{}, e2 interface{}, m map[interface{}]interface
 
 //Int64测试
 func TestInt64Keys(t *testing.T) {
+    keys := NewKeys(compareInt64Key, reflect.TypeOf(int64(1)));
     //调用测试模板
-    tmplTestKeys(t,                                                           //参数1
-        func() KeysIntfs {                                                    //参数2
-            return NewKeys(compareInt64Key, reflect.TypeOf(int64(1)))
-        },
+    tmplTestKeys(t,                                                          //参数1
+        keys,                                                                //参数2
         func() interface{} { return random.GenRandInt(1000) },               //参数3
         reflect.Int64)                                                       //参数4
 }
@@ -138,11 +137,10 @@ func compareStringKey(e1 interface{}, e2 interface{}, m map[interface{}]interfac
 
 //String测试
 func TestStringKeys(t *testing.T) {
+    keys := NewKeys(compareStringKey, reflect.TypeOf(string(1)));
     //调用测试模板
     tmplTestKeys(t,
-        func() KeysIntfs {
-            return NewKeys(compareStringKey, reflect.TypeOf(string(1)))
-        },
+        keys,
         func() interface{} { return random.GenRandString(10) },
         reflect.String)
 }

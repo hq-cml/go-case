@@ -232,20 +232,21 @@ func NewValKeys(compareFunc CompareFunction, elemType reflect.Type, omap Ordered
     }
 }
 
+//int64的val比较函数
+func compareInt64Val(e1 interface{}, e2 interface{}, m map[interface{}]interface{}) int8{
+    k1 := e1.(int64)
+    k2 := e2.(int64)
+    if k1 < k2 {
+        return -1
+    } else if k1 > k2 {
+        return 1
+    } else {
+        return 0
+    }
+}
+
 func TestInt64OrderedMap(t *testing.T) {
-    keys := NewKeys(
-        func(e1 interface{}, e2 interface{}) int8 {
-            k1 := e1.(int64)
-            k2 := e2.(int64)
-            if k1 < k2 {
-                return -1
-            } else if k1 > k2 {
-                return 1
-            } else {
-                return 0
-            }
-        },
-        reflect.TypeOf(int64(1)))
+    keys := NewKeys(compareInt64Val, reflect.TypeOf(int64(1)))
 
     //按val排序的map
     newOmap := func() OrderedMapIntfs {
