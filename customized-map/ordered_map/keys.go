@@ -31,7 +31,7 @@ type KeysIntfs interface {
 }
 
 //自定义类型myKeys
-type myKeys struct {
+type orderedKeys struct {
     container    []interface{}    //keys的实际容器，keys元素可以是任意类型
     compareFunc  CompareFunction  //函数也是一种类型，compareFunc负责比较元素的大小，具体实现交给上层开发者
     elemType     reflect.Type     //存储keys元素的实际类型，（运行时确定）
@@ -40,23 +40,23 @@ type myKeys struct {
 
 //让类型*myKeys实现KeysIntfs接口:
 //首先，实现嵌入接口sort.Interface：Len，Less，Swap
-func (keys *myKeys) Len() int{
+func (keys *orderedKeys) Len() int{
     return len(keys.container)
 }
-func (keys *myKeys) Less(i, j int) bool{
+func (keys *orderedKeys) Less(i, j int) bool{
     if keys.omap == nil {
         return keys.compareFunc(keys.container[i], keys.container[j], nil) < 0
     }else{
         return keys.compareFunc(keys.container[i], keys.container[j], keys.omap.m) < 0
     }
 }
-func (keys *myKeys) Swap(i, j int){
+func (keys *orderedKeys) Swap(i, j int){
     keys.container[i], keys.container[j] = keys.container[j], keys.container[i]
 }
 
 //接着，实现接口Keys的其他方法
 //判断k是否是可以存入myKeys.container的合法值
-func (keys *myKeys) isAcceptableElem(k interface{}) bool {
+func (keys *orderedKeys) isAcceptableElem(k interface{}) bool {
     if k == nil {
         return false
     }
@@ -67,7 +67,7 @@ func (keys *myKeys) isAcceptableElem(k interface{}) bool {
     return true
 }
 //Add方法
-func (keys *myKeys) Add(k interface{}) bool {
+func (keys *orderedKeys) Add(k interface{}) bool {
     ok := keys.isAcceptableElem(k)
     if !ok {
         return false
@@ -77,7 +77,7 @@ func (keys *myKeys) Add(k interface{}) bool {
     return true
 }
 //Search方法，返回值已命名；利用了sort.Search方法
-func (keys *myKeys) Search(k interface{}) (index int, contains bool) {
+func (keys *orderedKeys) Search(k interface{}) (index int, contains bool) {
     ok := keys.isAcceptableElem(k)
     if !ok {
         return
@@ -97,7 +97,7 @@ func (keys *myKeys) Search(k interface{}) (index int, contains bool) {
     return
 }
 //Remove方法
-func (keys *myKeys) Remove(k interface{}) bool {
+func (keys *orderedKeys) Remove(k interface{}) bool {
     index, contains := keys.Search(k)
     if !contains {
         return false
@@ -107,18 +107,18 @@ func (keys *myKeys) Remove(k interface{}) bool {
     return true
 }
 //Clear方法
-func (keys *myKeys) Clear() {
+func (keys *orderedKeys) Clear() {
     keys.container = make([]interface{}, 0)
 }
 //Get方法
-func (keys *myKeys) Get(index int) interface{} {
+func (keys *orderedKeys) Get(index int) interface{} {
     if index >= keys.Len() {
         return nil
     }
     return keys.container[index]
 }
 //GetAll，获得全部keys，放在一个slice中作为快照返回
-func (keys *myKeys) GetAll() []interface{} {
+func (keys *orderedKeys) GetAll() []interface{} {
     initialLen := len(keys.container)
     snapshot := make([]interface{}, initialLen)
     actualLen := 0
@@ -136,15 +136,15 @@ func (keys *myKeys) GetAll() []interface{} {
     return snapshot
 }
 //ElemType方法，获取key运行时的类型
-func (keys *myKeys) ElemType() reflect.Type {
+func (keys *orderedKeys) ElemType() reflect.Type {
     return keys.elemType
 }
 //CompareFunc方法，获取运行时用于比较key大小的具体方法
-func (keys *myKeys) CompareFunc() CompareFunction {
+func (keys *orderedKeys) CompareFunc() CompareFunction {
     return keys.compareFunc
 }
 //String方法，golang惯例，提供给fmt包
-func (keys *myKeys) String() string {
+func (keys *orderedKeys) String() string {
     var buf bytes.Buffer
     buf.WriteString("Keys<")
     buf.WriteString(keys.elemType.Kind().String())
@@ -167,7 +167,7 @@ func (keys *myKeys) String() string {
 //golang惯例，“构造”函数
 //返回值是KeysIntfs实现，所以是myKeys的指针
 func NewKeys(compareFunc CompareFunction, elemType reflect.Type) KeysIntfs {
-    return &myKeys{
+    return &orderedKeys{
         container:    make([]interface{}, 0),
         compareFunc:  compareFunc,
         elemType:     elemType,
