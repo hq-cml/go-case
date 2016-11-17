@@ -8,9 +8,10 @@ basic.go: 泛化的定制Map的接口。自定制的map接口类型，会嵌入�
             keys元素的迭代顺序，就代表了ordered_map的迭代顺序。
 
 测试：
-go test -run=TestInt64Keys github.com/hq-cml/go-case/customized-map/ordered_map -v #测试创建
-go test -run=TestStringKeys github.com/hq-cml/go-case/customized-map/ordered_map -v #测试创建
-
+go test -run=TestInt64Keys github.com/hq-cml/go-case/customized-map/ordered_map -v          #测试Keys排序
+go test -run=TestStringKeys github.com/hq-cml/go-case/customized-map/ordered_map -v         #测试Keys排序
+go test -run=TestInt64OrderedKeyMap github.com/hq-cml/go-case/customized-map/ordered_map -v #测试按Key排序
+go test -run=TestInt64OrderedMap github.com/hq-cml/go-case/customized-map/ordered_map -v    #测试按Value排序
 
 2. concurrent_map 线程安全的map
 

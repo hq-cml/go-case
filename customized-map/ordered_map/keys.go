@@ -35,7 +35,7 @@ type orderedKeys struct {
     container    []interface{}    //keys的实际容器，keys元素可以是任意类型
     compareFunc  CompareFunction  //函数也是一种类型，compareFunc负责比较元素的大小，具体实现交给上层开发者
     elemType     reflect.Type     //存储keys元素的实际类型，（运行时确定）
-    omap         *orderedMap      //myKeys所归属的ordered_map
+    omap         OrderedMapIntfs  //myKeys所归属的ordered_map
 }
 
 //让类型*myKeys实现KeysIntfs接口:
@@ -47,7 +47,8 @@ func (keys *orderedKeys) Less(i, j int) bool{
     if keys.omap == nil {
         return keys.compareFunc(keys.container[i], keys.container[j], nil) < 0
     }else{
-        return keys.compareFunc(keys.container[i], keys.container[j], keys.omap.m) < 0
+        omap := keys.omap.(*orderedMap)//暂时只支持orderedMap一种
+        return keys.compareFunc(keys.container[i], keys.container[j], omap.m) < 0
     }
 }
 func (keys *orderedKeys) Swap(i, j int){
@@ -87,7 +88,8 @@ func (keys *orderedKeys) Search(k interface{}) (index int, contains bool) {
     if keys.omap == nil {
         index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, nil) >= 0 })
     } else {
-        index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, keys.omap.m) >= 0 })
+        omap := keys.omap.(*orderedMap) //暂时只支持orderedMap一种
+        index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, omap.m) >= 0 })
     }
 
     //由于index并非一定是找到了的索引id，所以要在此确认一下

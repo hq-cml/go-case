@@ -219,29 +219,7 @@ func TestInt64OrderedKeyMap(t *testing.T) {
 //}
 //
 
-//int64的val比较函数，比较map的val
-func compareInt64Val(k1 interface{}, k2 interface{}, m map[interface{}]interface{}) int8{
-    var v1 int64
-    var v2 int64
-    if v, ok := m[k1]; ok{
-        v1 = v.(int64)
-    } else {
-        return -1
-    }
-    if v, ok := m[k2]; ok{
-        v2 = v.(int64)
-    } else {
-        return -1
-    }
 
-    if v1 < v2 {
-        return -1
-    } else if v1 > v2 {
-        return 1
-    } else {
-        return 0
-    }
-}
 
 //测试按val排序的map
 func TestInt64OrderedMap(t *testing.T) {
