@@ -132,7 +132,7 @@ func (omap *orderedMap) LastKey() interface{} {
 //获取由小于键值toKey且大于等于键值fromKey的键值所对应的键值对组成的OrderedMap类型值。其实本质上就是将map切出一部分来
 func (omap *orderedMap) SubMap(fromKey interface{}, toKey interface{}) OrderedMapIntfs {
     newOmap := &orderedMap{
-        keys:     NewKeys(omap.keys.CompareFunc(), omap.keys.ElemType(), nil),
+        keys:     NewKeys(omap.keys.CompareFunc(), omap.keys.ElemType(), omap.m),
         valType:  omap.valType,
         m:        make(map[interface{}]interface{})}
     omapLen := omap.Len()
