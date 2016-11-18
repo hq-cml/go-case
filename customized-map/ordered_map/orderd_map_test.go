@@ -208,20 +208,7 @@ func TestInt64OrderedKeyMap(t *testing.T) {
         reflect.Int64)
 }
 
-
-////返回值是KeysIntfs实现，所以是myKeys的指针
-//func NewValKeys(compareFunc CompareFunction, elemType reflect.Type, omap OrderedMapIntfs) KeysIntfs {
-//    return &myKeys{
-//        container:    make([]interface{}, 0),
-//        compareFunc:  compareFunc,
-//        elemType:     elemType,
-//    }
-//}
-//
-
-
-
-//测试按val排序的map
+//测试按value排序的map
 func TestInt64OrderedMap(t *testing.T) {
     keys := NewKeys(compareInt64Val, reflect.TypeOf(int64(1)))
 
