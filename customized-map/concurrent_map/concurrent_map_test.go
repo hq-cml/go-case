@@ -1,4 +1,4 @@
-package customized_map
+package concurrent_map
 
 import (
     "testing"
@@ -6,8 +6,7 @@ import (
     "fmt"
     "runtime/debug"
     "math/rand"
-    "bytes"
-    "time"
+    random "github.com/hq-cml/go-case/random"
 )
 
 /*************** 功能测试 *************/
@@ -33,6 +32,16 @@ func TestFloat64Cmap(t *testing.T) {
     genFunc := func() interface{} { return rand.Float64() }
 
     test(t, newFunc, genFunc, genFunc, reflect.Float64, reflect.Float64)
+}
+//测试string型cmap
+func TestStringCmap(t *testing.T) {
+    newCmap := func() ConcurrentMapIntfs {
+        keyType := reflect.TypeOf(string(2))
+        valType := keyType
+        return NewConcurrentMap(keyType, valType)
+    }
+    genFunc := func() interface{} { return random.GenRandString(10) }
+    test(t, newCmap, genFunc, genFunc, reflect.String, reflect.String)
 }
 
 func test(t *testing.T, newConcurrentMap func() ConcurrentMapIntfs, genKey func() interface{}, genVal func() interface{}, keyKind reflect.Kind, valKind reflect.Kind) {
@@ -168,39 +177,6 @@ func test(t *testing.T, newConcurrentMap func() ConcurrentMapIntfs, genKey func(
         t.FailNow()
     }
     t.Logf("The %s value %v has been cleared.", mapType, cmap)
-}
-
-//测试string型cmap
-func TestStringCmap(t *testing.T) {
-    newCmap := func() ConcurrentMapIntfs {
-        keyType := reflect.TypeOf(string(2))
-        valType := keyType
-        return NewConcurrentMap(keyType, valType)
-    }
-    genFunc := func() interface{} { return genRandString() }
-    test(t, newCmap, genFunc, genFunc, reflect.String, reflect.String)
-}
-
-func genRandString() string {
-    var buff bytes.Buffer
-    var prev string
-    var curr string
-    for i := 0; buff.Len() < 3; i++ {
-        curr = string(genRandAZAscii())
-        if curr == prev {
-            continue
-        }
-        prev = curr
-        buff.WriteString(curr)
-    }
-    return buff.String()
-}
-
-func genRandAZAscii() int {
-    min := 65 // A
-    max := 90 // Z
-    rand.Seed(time.Now().UnixNano())
-    return min + rand.Intn(max-min)
 }
 
 /***************性能测试***************/

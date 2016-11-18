@@ -15,6 +15,12 @@ basic.go: 泛化的定制Map的接口。自定制的map接口类型，会嵌入�
     go test -run=TestInt64OrderedMap github.com/hq-cml/go-case/customized-map/ordered_map -v    #测试按Value排序
 
 2. concurrent_map 线程安全的map
+    通过加一把读写锁，保证并发安全。
 
+    功能测试：
+    go test -run=TestInt64Cmap github.com/hq-cml/go-case/customized-map/concurrent_map -v    #
+    go test -run=TestStringCmap github.com/hq-cml/go-case/customized-map/concurrent_map -v   #
+
+    性能测试：
 
 

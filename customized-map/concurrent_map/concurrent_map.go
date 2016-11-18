@@ -1,4 +1,4 @@
-package customized_map
+package concurrent_map
 /*
  * 定制化map之：并发安全的map实现: ConcurrentMap
  */
@@ -7,11 +7,12 @@ import (
     "fmt"
     "reflect"
     "sync"
+    cmap "github.com/hq-cml/go-case/customized-map"
 )
 
-//并发map接口，接口的嵌套（可以理解为继承关系）
+//并发map接口，接口的嵌套（类似于继承关系）
 type ConcurrentMapIntfs interface {
-    GenericMapIntfs
+    cmap.GenericMapIntfs
 }
 
 //*concurrentMap实现ConcurrentMapIntfs
