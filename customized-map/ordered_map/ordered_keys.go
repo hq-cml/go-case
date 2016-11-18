@@ -32,10 +32,10 @@ type KeysIntfs interface {
 
 //自定义类型myKeys
 type orderedKeys struct {
-    container    []interface{}    //keys的实际容器，keys元素可以是任意类型
-    compareFunc  CompareFunction  //函数也是一种类型，compareFunc负责比较元素的大小，具体实现交给上层开发者
-    elemType     reflect.Type     //存储keys元素的实际类型，（运行时确定）
-    omap         OrderedMapIntfs  //myKeys所归属的ordered_map
+    container    []interface{}                //keys的实际容器，keys元素可以是任意类型
+    compareFunc  CompareFunction              //函数也是一种类型，compareFunc负责比较元素的大小，具体实现交给上层开发者
+    elemType     reflect.Type                 //存储keys元素的实际类型，（运行时确定）
+    baseMap      map[interface{}]interface{}  //myKeys所归属的ordered_map的成员map
 }
 
 //让类型*myKeys实现KeysIntfs接口:
@@ -44,11 +44,10 @@ func (keys *orderedKeys) Len() int{
     return len(keys.container)
 }
 func (keys *orderedKeys) Less(i, j int) bool{
-    if keys.omap == nil {
+    if keys.baseMap == nil {
         return keys.compareFunc(keys.container[i], keys.container[j], nil) < 0
     }else{
-        omap := keys.omap.(*orderedMap)//暂时只支持orderedMap一种
-        return keys.compareFunc(keys.container[i], keys.container[j], omap.m) < 0
+        return keys.compareFunc(keys.container[i], keys.container[j], keys.baseMap) < 0
     }
 }
 func (keys *orderedKeys) Swap(i, j int){
@@ -85,11 +84,10 @@ func (keys *orderedKeys) Search(k interface{}) (index int, contains bool) {
     }
     //sort.Serach的第二个参数是匿名函数，功能是判断i对应的元素，是否>=要寻找的k值
     //仔细看sort.Search的源码发现，返回值index其实是k对应的索引id(存在)，或者是大于k的最小的索引id(不存在)
-    if keys.omap == nil {
+    if keys.baseMap == nil {
         index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, nil) >= 0 })
     } else {
-        omap := keys.omap.(*orderedMap) //暂时只支持orderedMap一种
-        index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, omap.m) >= 0 })
+        index = sort.Search(keys.Len(), func(i int) bool { return keys.compareFunc(keys.container[i], k, keys.baseMap) >= 0 })
     }
 
     //由于index并非一定是找到了的索引id，所以要在此确认一下
@@ -168,11 +166,11 @@ func (keys *orderedKeys) String() string {
 
 //golang惯例，“构造”函数
 //返回值是KeysIntfs实现，所以是myKeys的指针
-func NewKeys(compareFunc CompareFunction, elemType reflect.Type, omap OrderedMapIntfs) KeysIntfs {
+func NewKeys(compareFunc CompareFunction, elemType reflect.Type, m map[interface{}]interface{}) KeysIntfs {
     return &orderedKeys{
         container:    make([]interface{}, 0),
         compareFunc:  compareFunc,
         elemType:     elemType,
-        omap:         omap,
+        baseMap:      m,
     }
 }

@@ -215,9 +215,9 @@ func TestInt64OrderedMap(t *testing.T) {
     //按val排序的map
     omap := NewOrderedMap(keys, reflect.TypeOf(int64(1)))
 
-    //！！！关键点：将omap放入keys，否则无法实现按值排序
+    //！！！关键点：将omap的m放入keys，否则无法实现按值排序
     okeys := keys.(*orderedKeys)
-    okeys.omap = omap.(*orderedMap)
+    okeys.baseMap = omap.(*orderedMap).m
 
     tmplTestOrderedMap(
         t,
