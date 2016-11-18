@@ -2,16 +2,17 @@
 
 basic.go: 泛化的定制Map的接口。自定制的map接口类型，会嵌入这个泛化接口（类似于继承），并加上自己的一些扩展的方式。
 
-1. ordered_map 可排序的map
+1. ordered_map 可排序的map（可支持按key或者val排序）
     如果要支持排序，需要实现接口sort.Interface。因为map类型元素是无序的，所以需要一个元素有序的类型做辅助。
    keys.go: 存储ordered_map的key。接口嵌套的方式，实现sort.Interface。对ordered_map的操作，比如len、swap、Less其实都是通过对这个辅助变量keys进行。
             keys元素的迭代顺序，就代表了ordered_map的迭代顺序。
+   ordered_map.go: 依托ordered_keys建立起来的map，根据ordered_keys实现了排序的map（可支持按key或者val排序）
 
-测试：
-go test -run=TestInt64Keys github.com/hq-cml/go-case/customized-map/ordered_map -v          #测试Keys排序
-go test -run=TestStringKeys github.com/hq-cml/go-case/customized-map/ordered_map -v         #测试Keys排序
-go test -run=TestInt64OrderedKeyMap github.com/hq-cml/go-case/customized-map/ordered_map -v #测试按Key排序
-go test -run=TestInt64OrderedMap github.com/hq-cml/go-case/customized-map/ordered_map -v    #测试按Value排序
+    测试：
+    go test -run=TestInt64Keys github.com/hq-cml/go-case/customized-map/ordered_map -v          #测试Keys排序
+    go test -run=TestStringKeys github.com/hq-cml/go-case/customized-map/ordered_map -v         #测试Keys排序
+    go test -run=TestInt64OrderedKeyMap github.com/hq-cml/go-case/customized-map/ordered_map -v #测试按Key排序
+    go test -run=TestInt64OrderedMap github.com/hq-cml/go-case/customized-map/ordered_map -v    #测试按Value排序
 
 2. concurrent_map 线程安全的map
 

@@ -168,11 +168,11 @@ func (keys *orderedKeys) String() string {
 
 //golang惯例，“构造”函数
 //返回值是KeysIntfs实现，所以是myKeys的指针
-func NewKeys(compareFunc CompareFunction, elemType reflect.Type) KeysIntfs {
+func NewKeys(compareFunc CompareFunction, elemType reflect.Type, omap OrderedMapIntfs) KeysIntfs {
     return &orderedKeys{
         container:    make([]interface{}, 0),
         compareFunc:  compareFunc,
         elemType:     elemType,
-        omap:         nil,
+        omap:         omap,
     }
 }

@@ -101,7 +101,7 @@ func tmplTestKeys(t *testing.T, keys KeysIntfs, genKey func() interface{}, elemK
 
 //Int64测试
 func TestInt64Keys(t *testing.T) {
-    keys := NewKeys(compareInt64Key, reflect.TypeOf(int64(1)));
+    keys := NewKeys(compareInt64Key, reflect.TypeOf(int64(1)), nil);
     //调用测试模板
     tmplTestKeys(t,                                                          //参数1
         keys,                                                                //参数2
@@ -111,7 +111,7 @@ func TestInt64Keys(t *testing.T) {
 
 //String测试
 func TestStringKeys(t *testing.T) {
-    keys := NewKeys(compareStringKey, reflect.TypeOf(string(1)));
+    keys := NewKeys(compareStringKey, reflect.TypeOf(string(1)), nil);
     //调用测试模板
     tmplTestKeys(t,
         keys,

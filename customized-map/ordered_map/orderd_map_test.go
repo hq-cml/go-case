@@ -195,7 +195,7 @@ func tmplTestOrderedMap(t *testing.T, omap OrderedMapIntfs, genKey func() interf
 
 //测试按Key排序的map
 func TestInt64OrderedKeyMap(t *testing.T) {
-    keys := NewKeys(compareInt64Key, reflect.TypeOf(int64(1)))
+    keys := NewKeys(compareInt64Key, reflect.TypeOf(int64(1)), nil)
 
     //按key排序的map
     omap := NewOrderedMap(keys, reflect.TypeOf(int64(1)))
@@ -210,12 +210,12 @@ func TestInt64OrderedKeyMap(t *testing.T) {
 
 //测试按value排序的map
 func TestInt64OrderedMap(t *testing.T) {
-    keys := NewKeys(compareInt64Val, reflect.TypeOf(int64(1)))
+    keys := NewKeys(compareInt64Val, reflect.TypeOf(int64(1)), nil)
 
     //按val排序的map
     omap := NewOrderedMap(keys, reflect.TypeOf(int64(1)))
 
-    //
+    //！！！关键点：将omap放入keys，否则无法实现按值排序
     okeys := keys.(*orderedKeys)
     okeys.omap = omap.(*orderedMap)
 
