@@ -22,5 +22,5 @@ basic.go: 泛化的定制Map的接口。自定制的map接口类型，会嵌入�
     go test -run=TestStringCmap github.com/hq-cml/go-case/customized-map/concurrent_map -v   #
 
     性能测试：
-
-
+    go test -bench=BenchmarkConcurrentMap github.com/hq-cml/go-case/customized-map/concurrent_map
+    go test -bench=BenchmarkMap github.com/hq-cml/go-case/customized-map/concurrent_map
