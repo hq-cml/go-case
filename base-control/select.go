@@ -27,8 +27,8 @@ func genTimeoutTimer() chan bool {
     fmt.Println("Geneate Timer")
     timeout := make(chan bool, 1)
 
+    timer := time.NewTimer(5*time.Second)
     go func() {
-        timer := time.NewTimer(5*time.Second)
         <- timer.C
         timeout <- false
     }()
