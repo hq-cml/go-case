@@ -9,6 +9,7 @@ import (
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
     io.WriteString(w, "Hello world!")
+    io.WriteString(w, r.PostFormValue("aaa"))
 }
 
 func main() {
