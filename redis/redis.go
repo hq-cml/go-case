@@ -18,6 +18,7 @@ var connVersion int64
 var m sync.Mutex
 
 //check Redis操作中的错误，如果是网络错误，则会进行重连
+//注意，只进行了重连，保证后续操作不会雪崩，本次操作不会重试，交给上层业务去决定是否重试
 func handleError(resp *redis.Resp){
 	if resp.IsType(redis.IOErr) {
 		fmt.Println("Aoh, Network error:", resp.Err.Error())
@@ -55,6 +56,7 @@ func InitRedisPool(address string) error{
 func Set(key, val string) error{
 	resp :=  p.Cmd("SET", key, val)
 	if resp.Err != nil {
+		handleError(resp)
 		return resp.Err
 	}else{
 		return nil
@@ -64,6 +66,7 @@ func Set(key, val string) error{
 func ExpireAt(key string, at int64) error{
 	resp :=  p.Cmd("EXPIREAT", key, at)
 	if resp.Err != nil {
+		handleError(resp)
 		return resp.Err
 	}else{
 		return nil
@@ -73,6 +76,7 @@ func ExpireAt(key string, at int64) error{
 func SetEx(key, val string, timeout int) error{
 	resp :=  p.Cmd("SET", key, val, "EX", timeout)
 	if resp.Err != nil {
+		handleError(resp)
 		return resp.Err
 	}else{
 		return nil
@@ -97,6 +101,7 @@ func Get(key string) (string,error){
 func Lpush(key, val string) error{
 	resp :=  p.Cmd("LPUSH", key, val)
 	if resp.Err != nil {
+		handleError(resp)
 		return resp.Err
 	}else{
 		return nil
@@ -106,6 +111,7 @@ func Lpush(key, val string) error{
 func Rpush(key, val string) error{
 	resp :=  p.Cmd("RPUSH", key, val)
 	if resp.Err != nil {
+		handleError(resp)
 		return resp.Err
 	}else{
 		return nil
@@ -115,6 +121,7 @@ func Rpush(key, val string) error{
 func Rpop(key string) (string,error) {
 	resp :=  p.Cmd("RPOP", key)
 	if resp.Err != nil {
+		handleError(resp)
 		return "", resp.Err
 	}else{
 		val, err := resp.Str()
@@ -128,6 +135,7 @@ func Rpop(key string) (string,error) {
 func Lpop(key string) (string,error) {
 	resp :=  p.Cmd("LPOP", key)
 	if resp.Err != nil {
+		handleError(resp)
 		return "", resp.Err
 	}else{
 		val, err := resp.Str()
@@ -141,6 +149,7 @@ func Lpop(key string) (string,error) {
 func Lrange(key string, start, length int) ([]string,error) {
 	resp :=  p.Cmd("LRANGE", key, start, length)
 	if resp.Err != nil {
+		handleError(resp)
 		return nil, resp.Err
 	}else{
 		lst, err := resp.List()
@@ -154,6 +163,7 @@ func Lrange(key string, start, length int) ([]string,error) {
 func Llen(key string) (int64,error) {
 	resp :=  p.Cmd("LLEN", key)
 	if resp.Err != nil {
+		handleError(resp)
 		return 0, resp.Err
 	}else{
 		val, err := resp.Int64()
