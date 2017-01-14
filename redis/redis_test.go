@@ -105,7 +105,7 @@ func TestExpire(t *testing.T) {
 }
 
 func TestConnTimeout(t *testing.T) {
-	fmt.Println("Begin")
+	t.Log("Begin")
 	err := InitRedisPool("127.0.0.1:6379")
 	if err != nil {
 		t.Log("Init redis pool error:", err.Error())
@@ -115,19 +115,24 @@ func TestConnTimeout(t *testing.T) {
 	if err !=nil {
 		t.Log("Error:", err.Error())
 	}
-	fmt.Println("Get aaa:", v)
-
-	t.Log("V is ", v)
+	t.Log("Get aaa:", v)
 
 	//redis-server 的超时设置成了10s
 	time.Sleep(12 * time.Second)
 
+	//这时候读取会失败
 	v,err = Get("a");
 	if err !=nil {
-		fmt.Println("Get a error:", err.Error())
-		t.Log("Error:", err.Error())
+		t.Log("Get a Error:", err.Error())
+
+		v,err = Get("a")
+		if err !=nil {
+			t.Log("Try again. Get a error:", err.Error())
+		}
+		t.Log("Try again. Get a :", v)
+	} else {
+		t.Log("Get a:", v)
 	}
-	fmt.Println("Get a:", v)
 
 	t.Log("Get a:", v)
 	time.Sleep(5 * time.Second)
