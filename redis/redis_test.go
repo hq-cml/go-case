@@ -1,6 +1,10 @@
 package redis
 
-import "testing"
+import (
+	"testing"
+	"time"
+	"fmt"
+)
 
 //测试基本的key、val方法
 func TestSetGet(t *testing.T) {
@@ -52,6 +56,11 @@ func TestList(t *testing.T) {
 		t.Fatal("Rpop hq_test error:", err.Error())
 	}
 	t.Log("The list is:", lst)
+	l,err := Llen("hq_test")
+	if err != nil {
+		t.Fatal("Llen hq_test error:", err.Error())
+	}
+	t.Log("The len is:", l)
 	val, err := Rpop("hq_test")
 	if err != nil {
 		t.Fatal("Rpop hq_test error:", err.Error())
@@ -67,4 +76,56 @@ func TestList(t *testing.T) {
 		t.Fatal("Rpop hq_test error:", err.Error())
 	}
 	t.Log("The list is:", lst)
+
+	l,err = Llen("hq_test")
+	if err != nil {
+		t.Fatal("Llen hq_test error:", err.Error())
+	}
+	t.Log("The len is:", l)
+}
+
+//测试基本的key、val方法
+func TestExpire(t *testing.T) {
+	err := InitRedisPool("10.94.112.246:6379")
+	if err != nil {
+		t.Fatal("Init redis pool error:", err.Error())
+	}
+	err = Set("hq1", "AAA")
+	if err != nil {
+		t.Fatal("Set hq1 error:", err.Error())
+	}
+
+	time := time.Now().Unix()
+	t.Log("Current time:", time)
+
+	err = ExpireAt("hq1", time + 1800)
+	if err != nil {
+		t.Fatal("Expire error:", err.Error())
+	}
+}
+
+func TestConnTimeout(t *testing.T) {
+	fmt.Println("AAAAAAAAA")
+	err := InitRedisPool("127.0.0.1:6379")
+	if err != nil {
+		t.Fatal("Init redis pool error:", err.Error())
+	}
+
+	v,err := Get("aaa");
+	if err !=nil {
+		t.Fatal("Error:", err.Error())
+	}
+
+	t.Log("V is ", v)
+
+	//redis-server 的超时设置成了10s
+	time.Sleep(12 * time.Second)
+
+	v,err = Get("a");
+	if err !=nil {
+		t.Log("Error:", err.Error())
+	}
+
+	t.Log("V is ", v)
+	time.Sleep(5 * time.Second)
 }

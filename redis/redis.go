@@ -1,19 +1,45 @@
 package redis
 
-import "github.com/mediocregopher/radix.v2/pool"
+import (
+	"github.com/mediocregopher/radix.v2/pool"
+	"fmt"
+	"time"
+)
 
 var p *pool.Pool
 
 //连接池
 func InitRedisPool(address string) error{
 	var err error
-	p, err = pool.New("tcp", address, 10)
+	p, err = pool.New("tcp", address, 5)
 	if err != nil {
 		return err
 	}
+
+	//启动协程保证Redis连接不超时
+	go func() {
+		for {
+			if err := p.Cmd("PING").Err; err !=nil {
+				fmt.Println("PING is err:", err.Error())
+			}else {
+				fmt.Println("PING is OK")
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
 	return nil
 }
 
+func ExpireAt(key string, at int64) error{
+	//p.Cmd简化写法
+	resp :=  p.Cmd("EXPIREAT", key, at)
+	if resp.Err != nil {
+		return resp.Err
+	}else{
+		return nil
+	}
+}
 //KV基本操作
 func Set(key, val string) error{
 	conn, err := p.Get()
@@ -122,5 +148,19 @@ func Lrange(key string, start, length int) ([]string,error) {
 			return nil, err
 		}
 		return lst, nil
+	}
+}
+
+func Llen(key string) (int64,error) {
+	//p.Cmd简化写法
+	resp :=  p.Cmd("LLEN", key)
+	if resp.Err != nil {
+		return 0, resp.Err
+	}else{
+		val, err := resp.Int64()
+		if err != nil {
+			return 0, err
+		}
+		return val, nil
 	}
 }
