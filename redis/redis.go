@@ -6,13 +6,18 @@ import (
 	//"fmt"
 	//"time"
 	"fmt"
+	"sync"
 )
 
 //连接池句柄，p.Cmd是简化先发，包含了p.Get和p.Put，具体可以参看radix.V2的源码
 var p *pool.Pool
 var addr string
-var connVersion int64
 
+//用connVersion和m实现一个简单的乐观锁，防止并发情况下出现网络异常的时候，多次重连
+var connVersion int64
+var m sync.Mutex
+
+//check Redis操作中的错误，如果是网络错误，则会进行重连
 func handleError(resp *redis.Resp){
 	if resp.IsType(redis.IOErr) {
 		fmt.Println("Aoh, Network error:", resp.Err.Error())
@@ -27,14 +32,22 @@ func handleError(resp *redis.Resp){
 //连接池
 func InitRedisPool(address string) error{
 	var err error
-	//if conn_ver == connVersion {
+	addr = address //将地址存储，便于后续重连
+
+	var local_ver = connVersion
+	m.Lock()
+	defer m.Unlock()
+	//如果local_ver != connVersion说明其他协程已经实现了重连
+	if local_ver == connVersion {
+		fmt.Println("Connect Redis. connVer:", connVersion)
 		p, err = pool.New("tcp", address, 5)
 		if err != nil {
 			return err
 		}
-	//}
+		connVersion ++
+	}
 
-	addr = address //将地址存储，便于后续重连
+
 	return nil
 }
 

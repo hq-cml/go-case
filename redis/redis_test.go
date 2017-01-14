@@ -3,7 +3,7 @@ package redis
 import (
 	"testing"
 	"time"
-	"fmt"
+	"runtime"
 )
 
 //测试基本的key、val方法
@@ -121,19 +121,84 @@ func TestConnTimeout(t *testing.T) {
 	time.Sleep(12 * time.Second)
 
 	//这时候读取会失败
-	v,err = Get("a");
+	v,err = Get("aaa");
 	if err !=nil {
-		t.Log("Get a Error:", err.Error())
+		t.Log("Get aaa Error:", err.Error())
 
-		v,err = Get("a")
+		v,err = Get("aaa")
 		if err !=nil {
-			t.Log("Try again. Get a error:", err.Error())
+			t.Log("Try again. Get aaa error:", err.Error())
 		}
-		t.Log("Try again. Get a :", v)
+		t.Log("Try again. Get aaa :", v)
 	} else {
-		t.Log("Get a:", v)
+		t.Log("Get aaa:", v)
 	}
 
-	t.Log("Get a:", v)
+	t.Log("Get aaa:", v)
+	time.Sleep(5 * time.Second)
+}
+
+//测试并发协程下的重连
+func TestMultiGoroutineConnTimeout(t *testing.T) {
+	//这句话必须要加的，否则没法测出并发的效果
+	runtime.GOMAXPROCS(4)
+	t.Log("Begin")
+	err := InitRedisPool("127.0.0.1:6379")
+	if err != nil {
+		t.Log("Init redis pool error:", err.Error())
+	}
+
+	go func() {
+		v,err := Get("bbb");
+		if err !=nil {
+			t.Log("Error:", err.Error())
+		}
+		t.Log("Get bbb:", v)
+
+		//redis-server 的超时设置成了10s
+		time.Sleep(12 * time.Second)
+
+		//这时候读取会失败
+		v,err = Get("bbb");
+		if err !=nil {
+			t.Log("Get bbb Error:", err.Error())
+
+			v,err = Get("bbb")
+			if err !=nil {
+				t.Log("Try again. Get bbb error:", err.Error())
+			}
+			t.Log("Try again. Get bbb :", v)
+		} else {
+			t.Log("Get bbb:", v)
+		}
+
+		t.Log("Get bbb:", v)
+		time.Sleep(5 * time.Second)
+	}()
+
+	v,err := Get("ccc");
+	if err !=nil {
+		t.Log("Error:", err.Error())
+	}
+	t.Log("Get ccc:", v)
+
+	//redis-server 的超时设置成了10s
+	time.Sleep(12 * time.Second)
+
+	//这时候读取会失败
+	v,err = Get("ccc");
+	if err !=nil {
+		t.Log("Get aaa Error:", err.Error())
+
+		v,err = Get("aaa")
+		if err !=nil {
+			t.Log("Try again. Get ccc error:", err.Error())
+		}
+		t.Log("Try again. Get ccc :", v)
+	} else {
+		t.Log("Get ccc:", v)
+	}
+
+	t.Log("Get ccc:", v)
 	time.Sleep(5 * time.Second)
 }
