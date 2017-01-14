@@ -2,10 +2,11 @@ package redis
 
 import (
 	"github.com/mediocregopher/radix.v2/pool"
-	"fmt"
-	"time"
+	//"fmt"
+	//"time"
 )
 
+//连接池句柄，p.Cmd是简化先发，包含了p.Get和p.Put，具体可以参看radix.V2的源码
 var p *pool.Pool
 
 //连接池
@@ -17,22 +18,31 @@ func InitRedisPool(address string) error{
 	}
 
 	//启动协程保证Redis连接不超时
-	go func() {
-		for {
-			if err := p.Cmd("PING").Err; err !=nil {
-				fmt.Println("PING is err:", err.Error())
-			}else {
-				fmt.Println("PING is OK")
-			}
-			time.Sleep(1 * time.Second)
-		}
-	}()
+	//go func() {
+	//	for {
+	//		if err := p.Cmd("PING").Err; err !=nil {
+	//			fmt.Println("PING is err:", err.Error())
+	//		}else {
+	//			fmt.Println("PING is OK")
+	//		}
+	//		time.Sleep(1 * time.Second)
+	//	}
+	//}()
 
 	return nil
 }
 
+//KV基本操作
+func Set(key, val string) error{
+	resp :=  p.Cmd("SET", key, val)
+	if resp.Err != nil {
+		return resp.Err
+	}else{
+		return nil
+	}
+}
+
 func ExpireAt(key string, at int64) error{
-	//p.Cmd简化写法
 	resp :=  p.Cmd("EXPIREAT", key, at)
 	if resp.Err != nil {
 		return resp.Err
@@ -40,77 +50,49 @@ func ExpireAt(key string, at int64) error{
 		return nil
 	}
 }
-//KV基本操作
-func Set(key, val string) error{
-	conn, err := p.Get()
-	if err != nil {
-		return err
-	}
-	defer p.Put(conn)
-
-	if conn.Cmd("SET", key, val).Err != nil {
-		return err
-	}
-	return nil
-}
 
 func SetEx(key, val string, timeout int) error{
-	conn, err := p.Get()
-	if err != nil {
-		return err
+	resp :=  p.Cmd("SET", key, val, "EX", timeout)
+	if resp.Err != nil {
+		return resp.Err
+	}else{
+		return nil
 	}
-	defer p.Put(conn)
-
-	if conn.Cmd("SET", key, val, "EX", timeout).Err != nil {
-		return err
-	}
-	return nil
 }
 
 func Get(key string) (string,error){
-	conn, err := p.Get()
-	if err != nil {
-		return "", err
+	resp :=  p.Cmd("GET", key)
+	if resp.Err != nil {
+		return "", resp.Err
+	}else{
+		val, err := resp.Str()
+		if err != nil {
+			return "", err
+		}
+		return val, nil
 	}
-	defer p.Put(conn)
-
-	val,err := p.Cmd("GET", key).Str()
-	if err != nil {
-		return "", err
-	}
-
-	return val, nil
 }
 
 //List基本操作
 func Lpush(key, val string) error{
-	conn, err := p.Get()
-	if err != nil {
-		return err
+	resp :=  p.Cmd("LPUSH", key, val)
+	if resp.Err != nil {
+		return resp.Err
+	}else{
+		return nil
 	}
-	defer p.Put(conn)
-
-	if conn.Cmd("LPUSH", key, val).Err != nil {
-		return err
-	}
-	return nil
 }
 
 func Rpush(key, val string) error{
-	conn, err := p.Get()
-	if err != nil {
-		return err
+	resp :=  p.Cmd("RPUSH", key, val)
+	if resp.Err != nil {
+		return resp.Err
+	}else{
+		return nil
 	}
-	defer p.Put(conn)
-
-	if conn.Cmd("RPUSH", key, val).Err != nil {
-		return err
-	}
-	return nil
 }
 
 func Rpop(key string) (string,error) {
-	//p.Cmd简化写法
 	resp :=  p.Cmd("RPOP", key)
 	if resp.Err != nil {
 		return "", resp.Err
@@ -124,7 +106,6 @@ func Rpop(key string) (string,error) {
 }
 
 func Lpop(key string) (string,error) {
-	//p.Cmd简化写法
 	resp :=  p.Cmd("LPOP", key)
 	if resp.Err != nil {
 		return "", resp.Err
@@ -138,7 +119,6 @@ func Lpop(key string) (string,error) {
 }
 
 func Lrange(key string, start, length int) ([]string,error) {
-	//p.Cmd简化写法
 	resp :=  p.Cmd("LRANGE", key, start, length)
 	if resp.Err != nil {
 		return nil, resp.Err
@@ -152,7 +132,6 @@ func Lrange(key string, start, length int) ([]string,error) {
 }
 
 func Llen(key string) (int64,error) {
-	//p.Cmd简化写法
 	resp :=  p.Cmd("LLEN", key)
 	if resp.Err != nil {
 		return 0, resp.Err

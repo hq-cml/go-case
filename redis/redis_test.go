@@ -105,16 +105,17 @@ func TestExpire(t *testing.T) {
 }
 
 func TestConnTimeout(t *testing.T) {
-	fmt.Println("AAAAAAAAA")
+	fmt.Println("Begin")
 	err := InitRedisPool("127.0.0.1:6379")
 	if err != nil {
-		t.Fatal("Init redis pool error:", err.Error())
+		t.Log("Init redis pool error:", err.Error())
 	}
 
 	v,err := Get("aaa");
 	if err !=nil {
-		t.Fatal("Error:", err.Error())
+		t.Log("Error:", err.Error())
 	}
+	fmt.Println("Get aaa:", v)
 
 	t.Log("V is ", v)
 
@@ -123,9 +124,11 @@ func TestConnTimeout(t *testing.T) {
 
 	v,err = Get("a");
 	if err !=nil {
+		fmt.Println("Get a error:", err.Error())
 		t.Log("Error:", err.Error())
 	}
+	fmt.Println("Get a:", v)
 
-	t.Log("V is ", v)
+	t.Log("Get a:", v)
 	time.Sleep(5 * time.Second)
 }
