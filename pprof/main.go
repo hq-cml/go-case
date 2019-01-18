@@ -20,7 +20,7 @@ func main() {
 	} else if *typ == "mem" {
 		mem("profile", "mem.profile")
 	} else if *typ == "block" {
-		mem("profile", "block.profile")
+		block("profile", "block.profile")
 	}
 }
 
@@ -37,6 +37,8 @@ func cpu(dir, file string) {
 		fmt.Printf("%s/%s profile start error: %v\n", dir, file, err)
 		return
 	}
+
+	//最终报告写入文件
 	defer pprof.StopCPUProfile()
 
 	//模拟CPU起飞
@@ -55,6 +57,8 @@ func mem(dir, file string) {
 	defer f.Close()
 
 	//runtime.MemProfileRate = 256 //可以设定，也可以不设定，默认512KB
+
+	//最终报告写入文件
 	defer pprof.WriteHeapProfile(f)
 
 	//模拟Mem起飞
@@ -76,8 +80,11 @@ func block(dir, file string) {
 	//只要发现一个阻塞事件的持续时间达到了2个纳秒，就可以对其进行采样
 	runtime.SetBlockProfileRate(2)
 
-	//模拟Mem起飞
-	if err = Execute(MemProfile, 10); err != nil {
+	//最终报告写入文件
+	defer pprof.Lookup("block").WriteTo(f, 2)
+
+	//模拟Block
+	if err = Execute(BlockProfile, 10); err != nil {
 		fmt.Printf("execute error: %v\n", err)
 		return
 	}
