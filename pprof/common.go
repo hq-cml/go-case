@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+// OpFunc 代表包含高负载操作的函数。
+type OpFunc func() error
+
 // CreateFile 用于在当前目录下创建一个指定名称的文件。
 // 若同名文件已存在，则清空并复用。
 func CreateFile(dir, name string) (*os.File, error) {
@@ -21,9 +24,6 @@ func CreateFile(dir, name string) (*os.File, error) {
 	path := filepath.Join(dir, name)
 	return os.Create(path)
 }
-
-// OpFunc 代表包含高负载操作的函数。
-type OpFunc func() error
 
 // Execute 用于执行指定次数的高负载的函数。
 func Execute(op OpFunc, times int) (err error) {

@@ -5,9 +5,10 @@ import (
 	"flag"
 	"runtime/pprof"
 	"runtime"
+	"time"
 )
 
-var typ *string = flag.String("type", "cpu", "Test type: cpu/mem/block")
+var typ *string = flag.String("type", "cpu", "Test type: cpu/mem/block/lookup")
 
 func main() {
 	flag.Parse()
@@ -21,6 +22,8 @@ func main() {
 		mem("profile", "mem.profile")
 	} else if *typ == "block" {
 		block("profile", "block.profile")
+	} else if *typ == "lookup" {
+		lookup("profile")
 	}
 }
 
@@ -56,6 +59,7 @@ func mem(dir, file string) {
 	}
 	defer f.Close()
 
+	//平均每分配多少个字节，就对堆内存的使用情况进行一次采样。
 	//runtime.MemProfileRate = 256 //可以设定，也可以不设定，默认512KB
 
 	//最终报告写入文件
@@ -88,4 +92,61 @@ func block(dir, file string) {
 		fmt.Printf("execute error: %v\n", err)
 		return
 	}
+}
+
+//lookup函数，会调用pprof.Lookup函数的6种可支持的参数，生成对应文件
+func lookup(dir string) {
+	//平均每分配8个字节，就对堆内存的使用情况进行一次采样
+	//一个阻塞事件的持续时间达到了2个纳秒，就对其进行采样
+	runtime.MemProfileRate = 8
+	runtime.SetBlockProfileRate(2)
+
+	for name, _ := range lookupOps {
+		for _, debug := range debugOpts {
+			err := doLookup(dir, name, debug)
+			if err != nil {
+				return
+			}
+			time.Sleep(time.Millisecond)
+		}
+	}
+}
+
+func doLookup(dir, name string, debug int) error {
+	fmt.Printf("Generate %s profile (debug: %d) ...\n", name, debug)
+	fileName := fmt.Sprintf("%s_%d.out", name, debug)
+	f, err := CreateFile(dir, fileName)
+	if err != nil {
+		fmt.Printf("create error: %v (%s)\n", err, fileName)
+		return err
+	}
+	defer f.Close()
+	if err = Execute(lookupOps[name], 10); err != nil {
+		fmt.Printf("execute error: %v (%s)\n", err, fileName)
+		return err
+	}
+	profile := pprof.Lookup(name)   //TODO 位置存疑
+	err = profile.WriteTo(f, debug)
+	if err != nil {
+		fmt.Printf("write error: %v (%s)\n", err, fileName)
+		return err
+	}
+	return nil
+}
+
+// Lookup一共支持6种参数， 每种参数给一个负载函数
+var lookupOps = map[string]OpFunc {
+	"goroutine": 	BlockProfile,
+	"heap": 		MemProfile,
+	"allocs": 		MemProfile,
+	"threadcreate": BlockProfile,
+	"block": 		BlockProfile,
+	"mutex": 		BlockProfile,
+}
+
+// debugOpts 代表debug参数的可选值列表。
+var debugOpts = []int {
+	0,
+	1,
+	2,
 }
