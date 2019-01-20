@@ -69,6 +69,7 @@ func genJSON(one box) ([]byte, error) {
 }
 
 /****************** 模拟阻塞 ******************/
+//Send多余recv， 所以send会阻塞
 func BlockProfile() error {
 	max := 100
 	senderNum := max / 2

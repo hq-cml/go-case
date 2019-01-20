@@ -9,6 +9,7 @@ import (
 )
 
 var typ *string = flag.String("type", "cpu", "Test type: cpu/mem/block/lookup")
+var sub_typ *string = flag.String("sub", "goroutine", "Sub type: goroutine/heap/allocs/threadcreate/block/mutex")
 
 func main() {
 	flag.Parse()
@@ -23,7 +24,7 @@ func main() {
 	} else if *typ == "block" {
 		block("profile", "block.profile")
 	} else if *typ == "lookup" {
-		lookup("profile")
+		lookup("profile", sub_typ)
 	}
 }
 
@@ -95,21 +96,34 @@ func block(dir, file string) {
 }
 
 //lookup函数，会调用pprof.Lookup函数的6种可支持的参数，生成对应文件
-func lookup(dir string) {
+func lookup(dir string, sub *string) {
 	//平均每分配8个字节，就对堆内存的使用情况进行一次采样
 	//一个阻塞事件的持续时间达到了2个纳秒，就对其进行采样
 	runtime.MemProfileRate = 8
 	runtime.SetBlockProfileRate(2)
 
-	for name, _ := range lookupOps {
+	if sub == nil {
+		fmt.Println("Sub type is nil")
+		for name, _ := range lookupOps {
+			for _, debug := range debugOpts {
+				err := doLookup(dir, name, debug)
+				if err != nil {
+					return
+				}
+				time.Sleep(time.Millisecond)
+			}
+		}
+	} else {
+		fmt.Println("Sub type is ", *sub)
 		for _, debug := range debugOpts {
-			err := doLookup(dir, name, debug)
+			err := doLookup(dir, *sub, debug)
 			if err != nil {
 				return
 			}
 			time.Sleep(time.Millisecond)
 		}
 	}
+
 }
 
 func doLookup(dir, name string, debug int) error {
@@ -125,8 +139,8 @@ func doLookup(dir, name string, debug int) error {
 		fmt.Printf("execute error: %v (%s)\n", err, fileName)
 		return err
 	}
-	profile := pprof.Lookup(name)   //TODO 位置存疑
-	err = profile.WriteTo(f, debug)
+
+	err = pprof.Lookup(name).WriteTo(f, debug)
 	if err != nil {
 		fmt.Printf("write error: %v (%s)\n", err, fileName)
 		return err
