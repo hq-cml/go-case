@@ -6,10 +6,11 @@ import (
 	"runtime/pprof"
 	"runtime"
 	"time"
+	"github.com/hq-cml/go-case/pprof/common"
 )
 
 var typ *string = flag.String("type", "cpu", "Test type: cpu/mem/block/lookup")
-var sub_typ *string = flag.String("sub", "goroutine", "Sub type: goroutine/heap/allocs/threadcreate/block/mutex")
+var sub_typ *string = flag.String("sub", "all", "Sub type: all | goroutine/heap/allocs/threadcreate/block/mutex")
 
 func main() {
 	flag.Parse()
@@ -29,7 +30,7 @@ func main() {
 }
 
 func cpu(dir, file string) {
-	f, err := CreateFile(dir, file)
+	f, err := common.CreateFile(dir, file)
 	if err != nil {
 		fmt.Printf("%s/%s profile creation error: %v\n", dir, file, err)
 		return
@@ -46,14 +47,14 @@ func cpu(dir, file string) {
 	defer pprof.StopCPUProfile()
 
 	//模拟CPU起飞
-	if err = Execute(CPUProfile, 10); err != nil {
+	if err = common.Execute(common.CPUProfile, 10); err != nil {
 		fmt.Printf("execute error: %v\n", err)
 		return
 	}
 }
 
 func mem(dir, file string) {
-	f, err := CreateFile(dir, file)
+	f, err := common.CreateFile(dir, file)
 	if err != nil {
 		fmt.Printf("%s/%s profile creation error: %v\n", dir, file, err)
 		return
@@ -67,14 +68,14 @@ func mem(dir, file string) {
 	defer pprof.WriteHeapProfile(f)
 
 	//模拟Mem起飞
-	if err = Execute(MemProfile, 10); err != nil {
+	if err = common.Execute(common.MemProfile, 10); err != nil {
 		fmt.Printf("execute error: %v\n", err)
 		return
 	}
 }
 
 func block(dir, file string) {
-	f, err := CreateFile(dir, file)
+	f, err := common.CreateFile(dir, file)
 	if err != nil {
 		fmt.Printf("%s/%s profile creation error: %v\n", dir, file, err)
 		return
@@ -89,7 +90,7 @@ func block(dir, file string) {
 	defer pprof.Lookup("block").WriteTo(f, 2)
 
 	//模拟Block
-	if err = Execute(BlockProfile, 10); err != nil {
+	if err = common.Execute(common.BlockProfile, 10); err != nil {
 		fmt.Printf("execute error: %v\n", err)
 		return
 	}
@@ -102,8 +103,8 @@ func lookup(dir string, sub *string) {
 	runtime.MemProfileRate = 8
 	runtime.SetBlockProfileRate(2)
 
-	if sub == nil {
-		fmt.Println("Sub type is nil")
+	if *sub == "all" {
+		fmt.Println("Sub type is all")
 		for name, _ := range lookupOps {
 			for _, debug := range debugOpts {
 				err := doLookup(dir, name, debug)
@@ -129,13 +130,13 @@ func lookup(dir string, sub *string) {
 func doLookup(dir, name string, debug int) error {
 	fmt.Printf("Generate %s profile (debug: %d) ...\n", name, debug)
 	fileName := fmt.Sprintf("%s_%d.out", name, debug)
-	f, err := CreateFile(dir, fileName)
+	f, err := common.CreateFile(dir, fileName)
 	if err != nil {
 		fmt.Printf("create error: %v (%s)\n", err, fileName)
 		return err
 	}
 	defer f.Close()
-	if err = Execute(lookupOps[name], 10); err != nil {
+	if err = common.Execute(lookupOps[name], 10); err != nil {
 		fmt.Printf("execute error: %v (%s)\n", err, fileName)
 		return err
 	}
@@ -149,13 +150,13 @@ func doLookup(dir, name string, debug int) error {
 }
 
 // Lookup一共支持6种参数， 每种参数给一个负载函数
-var lookupOps = map[string]OpFunc {
-	"goroutine": 	BlockProfile,
-	"heap": 		MemProfile,
-	"allocs": 		MemProfile,
-	"threadcreate": BlockProfile,
-	"block": 		BlockProfile,
-	"mutex": 		BlockProfile,
+var lookupOps = map[string]common.OpFunc {
+	"goroutine": 	common.BlockProfile,
+	"heap": 		common.MemProfile,
+	"allocs": 		common.MemProfile,
+	"threadcreate": common.BlockProfile,
+	"block": 		common.BlockProfile,
+	"mutex": 		common.BlockProfile,
 }
 
 // debugOpts 代表debug参数的可选值列表。
