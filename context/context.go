@@ -22,10 +22,22 @@ func main() {
 		ctxSon := context.WithValue(ctx, "A", 1)
 
 		//孙子
-		go func (ctx context.Context) {
-			fmt.Println("K--------", ctx.Value("A"))
+		go func (ctxSon context.Context) {
+			fmt.Println("K--------", ctxSon.Value("A"))
+			
+			//ctxSonSon, cancel := context.WithCancel(ctxSon)
+			ctxSonSon, _ := context.WithCancel(ctxSon)
+			//重孙子
+			go func (ctxSonSon context.Context) {
+				fmt.Println("L--------", ctxSonSon.Value("A"))
+				select {
+				case <- ctxSonSon.Done():
+					fmt.Println("SonSon exit!")
+				}
+			}(ctxSonSon)
+
 			select {
-			case <- ctx.Done():
+			case <- ctxSon.Done():
 				fmt.Println("Son exit!")
 			}
 		}(ctxSon)
