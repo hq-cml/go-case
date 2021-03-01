@@ -57,7 +57,11 @@ func main(){
     defer func(){
         if r:= recover(); r!=nil{
             if e, ok := r.(runtime.Error); ok {
+                //调用栈
+                buf := make([]byte, 1<<16)
+                len := runtime.Stack(buf, true)
                 fmt.Println("Recover(Runtime).", e)
+                fmt.Println("Call stack: ", string(buf[0: len]))
             } else {
                 fmt.Println("Recover(Unknown).", e)  //兜底
             }
