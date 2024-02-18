@@ -75,8 +75,8 @@ func main() {
 	// 时间的运算
 	fmt.Println(now.Add(1*time.Hour), "一小时后") //当前时间加1小时，如果减的话就用负号
 	fmt.Println(now.AddDate(0, 1, 0), "一个月后") // 一个月后的时间，如果减就用负数
-	delta := now.Sub(now.Add(1 * time.Hour))      // 时间相减，得到Duration
-	fmt.Println(delta)                            // 打印
+	delta := now.Sub(now.Add(1 * time.Hour))  // 时间相减，得到Duration
+	fmt.Println(delta)                        // 打印
 	fmt.Println(delta.String())
 	fmt.Println(int64(delta))
 	fmt.Println("-----------------------------")
